@@ -1,0 +1,2609 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AKURAT-RAK — Dinas Pemadam Kebakaran dan Penyelamatan Kota Bandung</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EEF0EA;
+    --panel:#FFFFFF;
+    --ink:#171B1E;
+    --muted:#5B6360;
+    --muted-2:#8B928D;
+    --line:#DBDFD5;
+    --line-soft:#E8EAE3;
+    --accent:#C1440C;
+    --accent-ink:#8F3309;
+    --accent-soft:#F6E4D8;
+    --good:#1F6F5C;
+    --good-soft:#DCEFE9;
+    --warn:#9C6B08;
+    --warn-soft:#F7ECD3;
+    --bad:#A5271F;
+    --bad-soft:#F5DEDC;
+    --navy:#232B32;
+    --radius:3px;
+    --sans: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--sans);
+    font-size:14px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--accent-soft);}
+  button{font-family:inherit;}
+  a{color:inherit;}
+
+  .app{
+    display:grid;
+    grid-template-columns:238px 1fr;
+    min-height:100vh;
+  }
+
+  /* ---------- Sidebar ---------- */
+  .sidebar{
+    background:var(--navy);
+    color:#EDEFE9;
+    padding:22px 18px;
+    display:flex;
+    flex-direction:column;
+    position:sticky;
+    top:0;
+    height:100vh;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding-bottom:20px;
+    margin-bottom:18px;
+    border-bottom:1px solid rgba(255,255,255,0.12);
+  }
+  .brand-mark{
+    width:34px;height:34px;flex:0 0 auto;
+    border-radius:2px;
+    background:var(--accent);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .brand-mark svg{width:19px;height:19px;}
+  .brand-text .t1{
+    font-weight:700;
+    font-size:15.5px;
+    letter-spacing:0.2px;
+    color:#fff;
+  }
+  .brand-text .t2{
+    font-size:10.5px;
+    color:#AEB6AC;
+    margin-top:1px;
+  }
+  .nav-group-label{
+    font-size:10.5px;
+    color:#8D9589;
+    padding:0 10px;
+    margin:14px 0 6px;
+    letter-spacing:.02em;
+  }
+  .nav{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  .nav-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:9px 10px;
+    border-radius:2px;
+    color:#C9CFC4;
+    cursor:pointer;
+    font-size:13.5px;
+    border:none;
+    background:transparent;
+    text-align:left;
+    width:100%;
+    position:relative;
+  }
+  .nav-item svg{width:16px;height:16px;flex:0 0 auto;opacity:.85;}
+  .nav-item:hover{background:rgba(255,255,255,0.06);color:#fff;}
+  .nav-item.active{
+    background:rgba(255,255,255,0.08);
+    color:#fff;
+    font-weight:500;
+  }
+  .nav-item.active::before{
+    content:"";
+    position:absolute;left:-18px;top:0;bottom:0;width:3px;
+    background:var(--accent);
+  }
+  .nav-item .badge{
+    margin-left:auto;
+    background:var(--accent);
+    color:#fff;
+    font-size:10px;
+    font-weight:600;
+    border-radius:20px;
+    padding:1px 6px;
+    font-family:var(--mono);
+  }
+  .sidebar-footer{
+    margin-top:auto;
+    padding-top:14px;
+    border-top:1px solid rgba(255,255,255,0.12);
+    font-size:11px;
+    color:#8D9589;
+    line-height:1.5;
+  }
+  .sidebar-footer b{color:#C9CFC4;}
+
+  /* ---------- Main ---------- */
+  .main{
+    padding:30px 40px 60px;
+    max-width:1180px;
+  }
+  .page-head{
+    margin-bottom:22px;
+  }
+  .crumb{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--muted-2);
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    margin-bottom:8px;
+  }
+  .page-head h1{
+    font-size:22px;
+    margin:0 0 6px;
+    font-weight:700;
+    letter-spacing:-0.2px;
+  }
+  .page-head p{
+    margin:0;
+    color:var(--muted);
+    max-width:640px;
+    font-size:13.5px;
+  }
+
+  .page{display:none;}
+  .page.active{display:block;}
+
+  /* ---------- Cards / panel ---------- */
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+  }
+  .panel-title{
+    padding:14px 18px;
+    border-bottom:1px solid var(--line-soft);
+    font-weight:600;
+    font-size:13.5px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .panel-title .hint{
+    font-weight:400;
+    color:var(--muted-2);
+    font-size:11.5px;
+  }
+  .panel-body{padding:18px;}
+
+  /* ---------- Filter bar ---------- */
+  .filterbar{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    align-items:flex-end;
+    margin-bottom:20px;
+    padding:16px 18px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+  }
+  .field{
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+    min-width:190px;
+    flex:1 1 190px;
+  }
+  .field label{
+    font-size:11px;
+    color:var(--muted);
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:.03em;
+  }
+  select, input[type="text"], input[type="number"], textarea{
+    font-family:var(--sans);
+    font-size:13px;
+    padding:8px 10px;
+    border:1px solid var(--line);
+    border-radius:2px;
+    background:#fff;
+    color:var(--ink);
+  }
+  select:focus, input:focus, textarea:focus{
+    outline:2px solid var(--accent);
+    outline-offset:-1px;
+    border-color:var(--accent);
+  }
+  .btn{
+    font-family:var(--sans);
+    font-size:13px;
+    font-weight:600;
+    padding:8px 16px;
+    border-radius:2px;
+    border:1px solid var(--ink);
+    background:var(--ink);
+    color:#fff;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .btn:hover{background:#000;}
+  .btn.secondary{
+    background:#fff;
+    color:var(--ink);
+    border:1px solid var(--line);
+  }
+  .btn.secondary:hover{border-color:var(--ink);}
+  .btn.accent{
+    background:var(--accent);
+    border-color:var(--accent);
+  }
+  .btn.accent:hover{background:var(--accent-ink);border-color:var(--accent-ink);}
+  .btn.danger-outline{
+    background:#fff;color:var(--bad);border:1px solid var(--bad);
+  }
+  .btn.danger-outline:hover{background:var(--bad-soft);}
+  .btn.small{padding:5px 11px;font-size:12px;}
+  .btn:disabled{opacity:.45;cursor:not-allowed;}
+
+  /* ---------- Summary cards ---------- */
+  .cards{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:12px;
+    margin-bottom:20px;
+  }
+  .stat-card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:16px 16px 14px;
+  }
+  .stat-card .label{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.03em;
+    color:var(--muted);
+    font-weight:600;
+    margin-bottom:8px;
+  }
+  .stat-card .value{
+    font-family:var(--mono);
+    font-size:20px;
+    font-weight:600;
+    letter-spacing:-0.3px;
+  }
+  .stat-card .sub{
+    margin-top:6px;
+    font-size:11.5px;
+    color:var(--muted-2);
+  }
+  .stat-card.accent .value{color:var(--accent-ink);}
+  .stat-card.good .value{color:var(--good);}
+
+  /* ---------- Table ---------- */
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px;
+  }
+  th,td{
+    text-align:left;
+    padding:9px 12px;
+    border-bottom:1px solid var(--line-soft);
+  }
+  th{
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:.03em;
+    color:var(--muted);
+    font-weight:600;
+    background:#FAFAF7;
+  }
+  td.num, th.num{text-align:right;font-family:var(--mono);}
+  tr.total-row td{
+    font-weight:700;
+    border-top:2px solid var(--ink);
+    border-bottom:none;
+    background:#FAFAF7;
+  }
+  tbody tr:hover td{background:#FBFAF6;}
+  .row-clickable{cursor:pointer;}
+
+  .dev-pos{color:var(--muted);}
+  .dev-neg{color:var(--accent-ink);}
+
+  .note{
+    font-size:12px;
+    color:var(--muted-2);
+    margin-top:10px;
+    padding-top:10px;
+    border-top:1px dashed var(--line);
+  }
+  .note b{color:var(--muted);}
+
+  /* ---------- Chart ---------- */
+  .chart-wrap{padding:18px 18px 6px;}
+  .legend{
+    display:flex;gap:18px;margin-bottom:10px;font-size:12px;color:var(--muted);
+  }
+  .legend span{display:flex;align-items:center;gap:6px;}
+  .legend i{width:10px;height:10px;display:inline-block;border-radius:1px;}
+
+  /* ---------- Form ---------- */
+  .form-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:14px;
+    margin-bottom:16px;
+  }
+  .form-grid .field.span-3{grid-column:1 / -1;}
+  .months-grid{
+    display:grid;
+    grid-template-columns:repeat(6,1fr);
+    gap:10px;
+    margin-bottom:8px;
+  }
+  .month-field label{
+    font-family:var(--mono);
+    font-size:10.5px;
+    color:var(--muted);
+    font-weight:600;
+  }
+  .month-field input{width:100%;text-align:right;font-family:var(--mono);}
+  .form-total{
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+    align-items:baseline;
+    padding:10px 0 4px;
+    font-size:13px;
+    color:var(--muted);
+  }
+  .form-total b{font-family:var(--mono);font-size:16px;color:var(--ink);}
+  .form-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+    margin-top:14px;
+    padding-top:14px;
+    border-top:1px solid var(--line-soft);
+  }
+  .radio-toggle{display:flex;gap:6px;}
+  .radio-toggle label{
+    display:flex;align-items:center;gap:6px;
+    border:1px solid var(--line);
+    padding:7px 12px;border-radius:2px;
+    font-size:12.5px;cursor:pointer;color:var(--muted);
+  }
+  .radio-toggle input{margin:0;}
+  .radio-toggle label.checked{border-color:var(--ink);color:var(--ink);font-weight:600;background:#FAFAF7;}
+
+  .toast{
+    position:fixed;
+    right:26px;bottom:26px;
+    background:var(--ink);
+    color:#fff;
+    padding:12px 18px;
+    border-radius:3px;
+    font-size:13px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.18);
+    display:none;
+    z-index:40;
+    max-width:340px;
+  }
+  .toast.show{display:block;}
+
+  /* ---------- Badges ---------- */
+  .badge{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    font-size:11px;
+    font-weight:600;
+    padding:3px 9px;
+    border-radius:20px;
+  }
+  .badge.warn{background:var(--warn-soft);color:var(--warn);}
+  .badge.good{background:var(--good-soft);color:var(--good);}
+  .badge.bad{background:var(--bad-soft);color:var(--bad);}
+
+  .empty-state{
+    padding:30px 18px;
+    text-align:center;
+    color:var(--muted-2);
+    font-size:13px;
+  }
+
+  .conn-banner{
+    margin-bottom:18px;
+    padding:10px 14px;
+    border-radius:2px;
+    font-size:12.5px;
+    font-weight:500;
+  }
+  .conn-banner.warn{ background:var(--warn-soft); color:var(--warn); border:1px solid #E9D8A6; }
+  .conn-banner.bad{ background:var(--bad-soft); color:var(--bad); border:1px solid #E7B9B5; }
+
+  /* ---------- Login ---------- */
+  .login-screen{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:var(--navy);
+  }
+  .login-card{
+    background:var(--panel);
+    border-radius:8px;
+    padding:32px 30px 28px;
+    width:390px;
+    max-width:calc(100vw - 32px);
+    box-sizing:border-box;
+    box-shadow:0 20px 50px rgba(0,0,0,0.35);
+  }
+  .login-card .field{width:100%;box-sizing:border-box;}
+  .login-card .field input,
+  .login-card .field input[type="text"],
+  .login-card .field input[type="email"],
+  .login-card .field input[type="password"]{
+    display:block;
+    width:100%;
+    max-width:100%;
+    min-width:0;
+    height:40px;
+    box-sizing:border-box;
+    margin:0;
+  }
+  .password-wrap{position:relative;width:100%;display:block;}
+  .password-wrap input{padding-right:42px !important;}
+  .password-toggle{
+    position:absolute;right:0;top:0;height:100%;width:42px;
+    border:0;background:transparent;color:var(--muted);cursor:pointer;
+    display:flex;align-items:center;justify-content:center;padding:0;
+  }
+  .password-toggle:hover{color:var(--ink);}
+  .password-toggle svg{width:18px;height:18px;}
+  .login-help{
+    margin-top:12px;font-size:11px;line-height:1.5;color:var(--muted);
+    display:none;padding:8px 10px;border-radius:4px;background:#F6F7F4;
+    border:1px solid var(--line-soft);
+  }
+  .login-success{
+    background:var(--good-soft);color:var(--good);font-size:12px;
+    padding:8px 10px;border-radius:4px;margin-top:10px;display:none;
+  }
+  .login-brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:22px;
+    padding-bottom:18px;
+    border-bottom:1px solid var(--line-soft);
+  }
+  .login-brand .t1{font-weight:700;font-size:16px;color:var(--ink);}
+  .login-brand .t2{font-size:11px;color:var(--muted);margin-top:1px;}
+  .login-error{
+    background:var(--bad-soft);
+    color:var(--bad);
+    font-size:12px;
+    padding:8px 10px;
+    border-radius:2px;
+    margin-top:10px;
+  }
+
+  /* ---------- User badge (sidebar) ---------- */
+  .user-badge{
+    background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.1);
+    border-radius:2px;
+    padding:10px 12px;
+    margin-bottom:14px;
+  }
+  .user-badge .user-name{font-size:12.5px;font-weight:600;color:#fff;}
+  .user-badge .user-role{font-size:11px;color:#AEB6AC;margin-top:2px;}
+
+  /* ---------- Detail / expand row ---------- */
+  .detail-row td{
+    background:#FAFAF7;
+    padding:0;
+  }
+  .detail-box{padding:16px 20px;}
+  .detail-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px 20px;
+    margin-bottom:14px;
+    font-size:12.5px;
+  }
+  .detail-grid .k{color:var(--muted);}
+  .detail-grid .v{font-weight:600;}
+  .mini-months{
+    display:grid;
+    grid-template-columns:repeat(6,1fr);
+    gap:8px;
+    margin-bottom:14px;
+  }
+  .mini-months .mm{
+    background:#fff;border:1px solid var(--line-soft);border-radius:2px;
+    padding:7px 8px;
+  }
+  .mini-months .mm .m{font-family:var(--mono);font-size:10px;color:var(--muted-2);text-transform:uppercase;}
+  .mini-months .mm .v{font-family:var(--mono);font-size:12.5px;font-weight:600;margin-top:2px;}
+
+  .reject-box{
+    display:flex;gap:8px;margin-top:10px;
+  }
+  .reject-box textarea{flex:1;min-height:36px;resize:vertical;}
+
+  .section-label{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    color:var(--muted-2);
+    font-weight:600;
+    margin:26px 0 10px;
+  }
+
+  .flow-steps{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+    margin-bottom:22px;
+  }
+  .flow-step{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:12px 14px;
+    font-size:12px;
+    color:var(--muted);
+  }
+  .flow-step b{display:block;color:var(--ink);font-size:13px;margin-bottom:3px;}
+  .flow-arrow{
+    display:flex;align-items:center;justify-content:center;color:var(--muted-2);
+  }
+
+/* Hilangkan tombol naik/turun pada input angka agar tidak berubah tidak sengaja saat mouse digunakan */
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* ================= RESPONSIVE v3: laptop, tablet, HP ================= */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}
+body{
+  overflow-x:hidden;
+  min-height:100vh;min-height:100dvh;
+  padding-left:env(safe-area-inset-left,0px);
+  padding-right:env(safe-area-inset-right,0px);
+}
+img,svg{max-width:100%;}
+button,input,select,textarea{max-width:100%;}
+
+/* --- Layout utama --- */
+.app{
+  width:100%;
+  min-height:100vh;min-height:100dvh;
+  grid-template-columns:clamp(200px,18vw,238px) minmax(0,1fr);
+}
+.sidebar{height:100vh;height:100dvh;overflow-y:auto;}
+.main{
+  min-width:0;width:100%;
+  max-width:1320px;margin-inline:auto;
+  padding:30px clamp(20px,3vw,40px) 60px;
+}
+.page,.panel,.filterbar,.cards,.form-grid{min-width:0;max-width:100%;}
+.form-grid>*,.cards>*{min-width:0;}
+.page-head h1{font-size:clamp(18px,2.4vw,22px);line-height:1.3;overflow-wrap:break-word;}
+.panel-title{flex-wrap:wrap;gap:4px 12px;}
+
+/* --- Form: radio/checkbox tidak ikut dilebarkan --- */
+select,textarea,
+input:not([type="radio"]):not([type="checkbox"]){width:100%;min-width:0;}
+input[type="date"]{min-height:36px;}
+.field{min-width:min(100%,190px);}
+.radio-toggle{flex-wrap:wrap;}
+.form-total{flex-wrap:wrap;}
+
+/* --- Kartu ringkasan: 3 kolom di laptop, 5 kolom hanya di layar lebar --- */
+.cards{grid-template-columns:repeat(6,minmax(0,1fr));}
+.cards>.stat-card{grid-column:span 2;}
+.cards>.stat-card:nth-child(n+4){grid-column:span 3;}
+.stat-card .value{font-size:clamp(16px,1.6vw,20px);overflow-wrap:anywhere;}
+.stat-card .sub{overflow-wrap:break-word;}
+@media (min-width:1500px){
+  .cards{grid-template-columns:repeat(5,minmax(0,1fr));}
+  .cards>.stat-card,.cards>.stat-card:nth-child(n+4){grid-column:auto;}
+}
+
+/* --- Tabel: scroll horizontal di dalam wadahnya, bukan melebarkan halaman --- */
+.table-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.table-wrap table{min-width:720px;}
+.table-wrap table.compact{min-width:520px;}
+.table-wrap table.wide{min-width:880px;}
+th{white-space:nowrap;}
+td{vertical-align:top;overflow-wrap:break-word;}
+td.num{white-space:nowrap;}
+.detail-row td{min-width:0;}
+
+/* --- Bulan & detail --- */
+.months-grid{grid-template-columns:repeat(6,minmax(0,1fr));}
+.mini-months{grid-template-columns:repeat(6,minmax(0,1fr));}
+.detail-grid{grid-template-columns:repeat(3,minmax(0,1fr));}
+.month-field input{padding:8px 6px;}
+
+/* ===== Tablet & di bawahnya (sidebar menjadi header atas) ===== */
+@media (max-width:1100px){
+  .months-grid{grid-template-columns:repeat(4,minmax(0,1fr));}
+}
+@media (max-width:920px){
+  .app{grid-template-columns:minmax(0,1fr);}
+  .sidebar{
+    position:sticky;top:0;z-index:50;
+    width:100%;height:auto;overflow:visible;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    grid-template-areas:"brand user" "nav nav";
+    align-items:center;gap:0 10px;
+    padding:calc(10px + env(safe-area-inset-top,0px)) 14px 0;
+  }
+  .brand{grid-area:brand;margin:0;padding:0 0 8px;border-bottom:0;min-width:0;}
+  .brand-text{min-width:0;}
+  .brand-text .t1,.brand-text .t2{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .nav-group-label{display:none;}
+  .sidebar-footer{grid-area:user;margin:0;padding:0 0 8px;border-top:0;}
+  .sidebar-about{display:none;}
+  .user-badge{margin:0;padding:6px 10px;max-width:44vw;}
+  .user-badge .user-name,.user-badge .user-role{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .user-badge .btn{margin-top:6px !important;}
+  .nav{
+    grid-area:nav;flex-direction:row;gap:2px;
+    overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;
+    margin:0 -14px;padding:0 14px;
+  }
+  .nav::-webkit-scrollbar{display:none;}
+  .nav-item{width:auto;flex:0 0 auto;white-space:nowrap;min-height:42px;padding:10px 12px;}
+  .nav-item .badge{margin-left:6px;}
+  .nav-item.active::before{left:0;right:0;top:auto;bottom:0;width:auto;height:3px;}
+
+  .main{padding:20px 20px 48px;max-width:none;}
+  .cards{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .cards>.stat-card,.cards>.stat-card:nth-child(n+4){grid-column:auto;}
+  .cards>.stat-card:last-child:nth-child(odd){grid-column:1 / -1;}
+  .form-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .flow-steps{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .detail-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .mini-months{grid-template-columns:repeat(4,minmax(0,1fr));}
+  .toast{right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));}
+}
+
+/* ===== HP ===== */
+@media (max-width:640px){
+  .main{padding:14px 12px 40px;}
+  .cards{grid-template-columns:minmax(0,1fr);gap:10px;}
+  .cards>.stat-card:last-child:nth-child(odd){grid-column:auto;}
+  .form-grid{grid-template-columns:minmax(0,1fr);}
+  .months-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}
+  .detail-grid{grid-template-columns:minmax(0,1fr);}
+  .mini-months{grid-template-columns:repeat(3,minmax(0,1fr));}
+  .flow-steps{grid-template-columns:minmax(0,1fr);}
+  .panel-body,.filterbar{padding:12px;}
+  .panel-title{padding:12px;}
+  .chart-wrap{padding:12px 12px 4px;}
+  .filterbar{gap:10px;}
+  .filterbar .btn{width:100%;}
+  .legend{flex-wrap:wrap;gap:6px 14px;}
+
+  /* 16px mencegah iOS memperbesar layar otomatis saat field difokus */
+  select,textarea,input{font-size:16px;}
+  .btn{min-height:42px;}
+  .btn.small{min-height:34px;}
+  .form-actions{flex-direction:column-reverse;align-items:stretch;}
+  .form-actions .btn{width:100%;}
+  .reject-box{flex-direction:column;}
+  .reject-box .btn{width:100%;}
+
+  table{font-size:12.5px;}
+  th,td{padding:8px 10px;}
+  .table-wrap table{min-width:640px;}
+  .table-wrap table.compact{min-width:480px;}
+  .table-wrap table.wide{min-width:800px;}
+  .detail-box{padding:12px;}
+
+  .toast{left:12px;right:12px;max-width:none;}
+  .login-screen{padding:16px;}
+  .login-card{width:100%;max-width:430px;margin:0 auto;padding:26px 20px 22px;}
+}
+
+@media (max-width:380px){
+  .months-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .brand-text .t2{display:none;}
+}
+
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div class="login-screen" id="login-screen" style="display:none;">
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 2C12 2 6 8.5 6 14a6 6 0 0 0 12 0c0-2-1-3.5-1-3.5s-.5 2-2 2.5c1-2 .5-4.5-1-6.5.5 2-.5 3-1 3.5C13.5 7 12 2 12 2Z" fill="#fff"/></svg>
+      </div>
+      <div>
+        <div class="t1">AKURAT-RAK</div>
+        <div class="t2">Dinas Damkar &amp; Penyelamatan Kota Bandung</div>
+      </div>
+    </div>
+    <form id="login-form">
+      <div class="field" style="margin-bottom:12px;">
+        <label>Username</label>
+        <input type="text" id="login-username" autocomplete="username">
+      </div>
+      <div class="field" style="margin-bottom:0;">
+        <label>Password</label>
+        <div class="password-wrap">
+          <input type="password" id="login-password" autocomplete="current-password">
+          <button type="button" class="password-toggle" id="password-toggle" aria-label="Tampilkan password" title="Tampilkan password">
+            <svg id="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.5"/>
+            </svg>
+            <svg id="eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+              <path d="M3 3l18 18"/><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"/><path d="M9.9 5.2A10.8 10.8 0 0 1 12 5c6 0 9.5 7 9.5 7a18.5 18.5 0 0 1-3 3.7"/><path d="M6.2 6.2C3.7 8.1 2.5 12 2.5 12s3.5 7 9.5 7c1.4 0 2.7-.3 3.8-.8"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="login-error" id="login-error" style="display:none;"></div>
+      <div class="login-success" id="login-success"></div>
+      <div class="login-help" id="login-help"></div>
+      <button type="submit" class="btn accent" id="login-submit" style="width:100%;margin-top:14px;">Masuk</button>
+    </form>
+  </div>
+</div>
+
+<div class="app" id="app-shell" style="display:none;">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 2C12 2 6 8.5 6 14a6 6 0 0 0 12 0c0-2-1-3.5-1-3.5s-.5 2-2 2.5c1-2 .5-4.5-1-6.5.5 2-.5 3-1 3.5C13.5 7 12 2 12 2Z" fill="#fff"/></svg>
+      </div>
+      <div class="brand-text">
+        <div class="t1">AKURAT-RAK</div>
+        <div class="t2">Dinas Damkar &amp; Penyelamatan Kota Bandung</div>
+      </div>
+    </div>
+
+    <div class="nav-group-label">Menu</div>
+    <nav class="nav">
+      <button class="nav-item active" data-page="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="12" width="4" height="8"/><rect x="10" y="7" width="4" height="13"/><rect x="17" y="3" width="4" height="17"/></svg>
+        Dashboard
+      </button>
+      <button class="nav-item" data-page="input">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 20h16M4 20V6a2 2 0 0 1 2-2h7l5 5v11"/><path d="M13 4v5h5"/></svg>
+        Input Rencana
+      </button>
+      <button class="nav-item" data-page="verify">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>
+        Verifikasi
+        <span class="badge" id="pending-badge">0</span>
+      </button>
+      <button class="nav-item" data-page="realisasi">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="9"/></svg>
+        Input Realisasi
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-badge" id="user-badge" style="display:none;"></div>
+      <div class="sidebar-about"><b>AKURAT-RAK</b><br>
+      Instrumen pendukung penyusunan &amp; monitoring RAK.</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <div class="conn-banner" id="conn-banner" style="display:none;"></div>
+
+    <!-- ============ DASHBOARD PAGE ============ -->
+    <section class="page active" id="page-dashboard">
+      <div class="page-head">
+        <div class="crumb">AKURAT-RAK / Dashboard</div>
+        <h1>Dashboard RAK, Realisasi &amp; Deviasi</h1>
+        
+      </div>
+
+      <div class="filterbar">
+        <div class="field">
+          <label>Sub Unit</label>
+          <select id="f-subunit"></select>
+        </div>
+        <div class="field">
+          <label>Sub Kegiatan</label>
+          <select id="f-subkegiatan"></select>
+        </div>
+        <div class="field">
+          <label>Belanja / Kode Rekening</label>
+          <select id="f-belanja"></select>
+        </div>
+        <button class="btn secondary" id="f-reset">Reset filter</button>
+      </div>
+
+      <div class="cards" id="dash-cards"></div>
+
+      <div class="panel" style="margin-bottom:20px;">
+        <div class="panel-title">RAK vs Realisasi per Bulan <span class="hint">Tahun Anggaran 2026</span></div>
+        <div class="chart-wrap">
+          <div class="legend">
+            <span><i style="background:var(--navy)"></i>RAK</span>
+            <span><i style="background:var(--accent)"></i>Realisasi</span>
+          </div>
+          <div id="chart-holder"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">Rincian RAK, Realisasi, dan Deviasi </div>
+        <div class="panel-body" style="padding:0;">
+          <div class="table-wrap"><table class="compact">
+            <thead>
+              <tr>
+                <th>Bulan</th>
+                <th class="num">RAK</th>
+                <th class="num">Realisasi</th>
+                <th class="num">Deviasi (RAK−Realisasi)</th>
+                <th class="num">% Realisasi</th>
+              </tr>
+            </thead>
+            <tbody id="dash-table-body"></tbody>
+          </table></div>
+        </div>
+        <div class="panel-body" style="padding-top:0;">
+          
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ INPUT PAGE ============ -->
+    <section class="page" id="page-input">
+      <div class="page-head">
+        <div class="crumb">AKURAT-RAK / Input Rencana</div>
+        <h1>Input Rencana Kebutuhan Belanja (PPTK)</h1>
+        <p>Pilih Sub Unit, lalu Sub Kegiatan yang khusus dimiliki Sub Unit tersebut, lalu Belanja/Kode Rekening pada Sub Kegiatan itu. Isi rencana kebutuhan untuk Januari–Desember dalam satu pengajuan.</p>
+      </div>
+
+      <div class="panel" style="margin-bottom:24px;">
+        <div class="panel-title">Form Pengajuan Rencana Kebutuhan</div>
+        <div class="panel-body">
+
+          <div class="form-grid">
+            <div class="field">
+              <label>Sub Unit</label>
+              <select id="in-subunit">
+                <option value="">Pilih Sub Unit…</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Sub Kegiatan</label>
+              <select id="in-subkegiatan" disabled>
+                <option value="">Pilih Sub Unit terlebih dahulu</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Belanja / Kode Rekening</label>
+              <select id="in-belanja" disabled>
+                <option value="">Pilih Sub Kegiatan terlebih dahulu</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field span-3" style="margin-bottom:16px;">
+            <label>Uraian Rencana Kebutuhan Belanja</label>
+            <input type="text" id="in-uraian" placeholder="Contoh: Pengadaan bahan bakar mobil pemadam untuk operasional triwulan IV">
+          </div>
+
+          <div class="field" style="margin-bottom:14px;">
+            <label>Rencana per Bulan (Rp)</label>
+          </div>
+          <div class="months-grid" id="in-months"></div>
+
+          <div class="form-total">
+            Total rencana 1 tahun: <b id="in-total">Rp 0</b>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn secondary" id="in-clear">Bersihkan Form</button>
+            <button class="btn accent" id="in-submit">Ajukan Rencana Kebutuhan</button>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="section-label">Riwayat Pengajuan</div>
+      <div class="panel">
+        <div class="table-wrap"><table>
+          <thead>
+            <tr>
+              <th>Sub Unit</th>
+              <th>Sub Kegiatan</th>
+              <th>Belanja / Kode Rekening</th>
+              <th>Diajukan Oleh</th>
+              <th class="num">Total Diajukan</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="in-history-body"></tbody>
+        </table></div>
+        <div class="empty-state" id="in-history-empty" style="display:none;">Belum ada pengajuan.</div>
+      </div>
+    </section>
+
+    <!-- ============ VERIFY PAGE ============ -->
+    <section class="page" id="page-verify">
+      <div class="page-head">
+        <div class="crumb">AKURAT-RAK / Verifikasi</div>
+        <h1>Verifikasi Rencana Kebutuhan</h1>
+        <p>Verifikasi pengajuan rencana kebutuhan dari PPTK sebagai bahan penyusunan/pemutakhiran RAK. Fitur ini tersedia untuk Subbag Keuangan dan Admin.</p>
+      </div>
+
+      <div class="section-label">Menunggu Verifikasi</div>
+      <div class="panel" style="margin-bottom:24px;">
+        <div class="table-wrap"><table class="wide">
+          <thead>
+            <tr>
+              <th style="width:26px;"></th>
+              <th>Sub Unit</th>
+              <th>Sub Kegiatan</th>
+              <th>Uraian Kebutuhan</th>
+              <th class="num">Total</th>
+              <th style="width:230px;">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="verify-pending-body"></tbody>
+        </table></div>
+        <div class="empty-state" id="verify-pending-empty" style="display:none;">Tidak ada pengajuan yang menunggu verifikasi.</div>
+      </div>
+
+      <div class="section-label">Riwayat Proses</div>
+      <div class="panel">
+        <div class="table-wrap"><table>
+          <thead>
+            <tr>
+              <th style="width:26px;"></th>
+              <th>Sub Unit</th>
+              <th>Sub Kegiatan</th>
+              <th>Uraian Kebutuhan</th>
+              <th class="num">Total</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="verify-done-body"></tbody>
+        </table></div>
+        <div class="empty-state" id="verify-done-empty" style="display:none;">Belum ada riwayat.</div>
+      </div>
+    </section>
+
+    <!-- ============ INPUT REALISASI PAGE ============ -->
+    <section class="page" id="page-realisasi">
+      <div class="page-head">
+        <div class="crumb">AKURAT-RAK / Input Realisasi</div>
+        <h1>Input Realisasi (Subbag Keuangan)</h1>
+        <p>Catat realisasi berdasarkan SP2D / bukti pencairan, per transaksi — sesuai struktur Kartu Kendali Kegiatan. Dashboard menghitung ulang Realisasi &amp; Deviasi secara otomatis dari data ini.</p>
+      </div>
+
+      <div class="panel" style="margin-bottom:24px;">
+        <div class="panel-title">Form Pencatatan Realisasi</div>
+        <div class="panel-body">
+          <div class="form-grid">
+            <div class="field">
+              <label>Sub Unit</label>
+              <select id="rl-subunit">
+                <option value="">Pilih Sub Unit…</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Sub Kegiatan</label>
+              <select id="rl-subkegiatan" disabled>
+                <option value="">Pilih Sub Unit terlebih dahulu</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Belanja / Kode Rekening</label>
+              <select id="rl-belanja" disabled>
+                <option value="">Pilih Sub Kegiatan terlebih dahulu</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="field">
+              <label>Tanggal (SP2D)</label>
+              <input type="date" id="rl-tanggal">
+            </div>
+            <div class="field">
+              <label>No. SP2D / No. Bukti</label>
+              <input type="text" id="rl-nobukti" placeholder="Contoh: 32.73/10.0/000002/LPJ-BPSAH/...">
+            </div>
+            <div class="field">
+              <label>Jumlah (Rp)</label>
+              <input type="number" id="rl-jumlah" min="0" step="1000" placeholder="0">
+            </div>
+          </div>
+
+          <div class="field span-3" style="margin-bottom:4px;">
+            <label>Uraian Transaksi</label>
+            <input type="text" id="rl-uraian" placeholder="Contoh: (BBJ) Pengajuan GU 2 UPTD Utara Dinas Pemadam Kebakaran dan Penyelamatan Kota Bandung">
+          </div>
+
+          <div class="form-actions">
+            <button class="btn secondary" id="rl-clear">Bersihkan Form</button>
+            <button class="btn accent" id="rl-submit">Simpan Realisasi</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-label">Riwayat Realisasi Tercatat</div>
+      <div class="panel">
+        <div class="table-wrap"><table class="wide">
+          <thead>
+            <tr>
+              <th>Tanggal</th>
+              <th>Sub Unit</th>
+              <th>Belanja / Kode Rekening</th>
+              <th>No. Bukti</th>
+              <th>Uraian</th>
+              <th class="num">Jumlah</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="rl-history-body"></tbody>
+        </table></div>
+        <div class="empty-state" id="rl-history-empty" style="display:none;">Belum ada realisasi tercatat.</div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const RAK_LEAF_ITEMS = [{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.01.0001","sub_kegiatan":"Penyusunan Dokumen Perencanaan Perangkat Daerah","kode_rekening":"5.1.02.01.001.00026","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor- Bahan Cetak","pagu":3000000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.01.0001","sub_kegiatan":"Penyusunan Dokumen Perencanaan Perangkat Daerah","kode_rekening":"5.1.02.01.001.00052","uraian":"Belanja Makanan dan Minuman Rapat","pagu":36880000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.01.0001","sub_kegiatan":"Penyusunan Dokumen Perencanaan Perangkat Daerah","kode_rekening":"5.1.02.02.001.00003","uraian":"Honorarium Narasumber atau Pembahas, Moderator, Pembawa Acara, dan Panitia","pagu":17100000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.01.0007","sub_kegiatan":"Evaluasi Kinerja Perangkat Daerah","kode_rekening":"5.1.02.01.001.00026","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor- Bahan Cetak","pagu":4000000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.01.0007","sub_kegiatan":"Evaluasi Kinerja Perangkat Daerah","kode_rekening":"5.1.02.01.001.00052","uraian":"Belanja Makanan dan Minuman Rapat","pagu":41400000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.02.0001","sub_kegiatan":"Penyediaan Gaji dan Tunjangan ASN","kode_rekening":"5.1.01.01.001.00001","uraian":"Belanja Gaji Pokok PNS","pagu":5828500000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.02.0001","sub_kegiatan":"Penyediaan Gaji dan Tunjangan ASN","kode_rekening":"5.1.01.01.001.00002","uraian":"Belanja Gaji Pokok PPPK","pagu":3418378200.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.02.0001","sub_kegiatan":"Penyediaan Gaji dan Tunjangan ASN","kode_rekening":"5.1.01.01.002.00001","uraian":"Belanja Tunjangan Keluarga PNS","pagu":685441169.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.02.0001","sub_kegiatan":"Penyediaan Gaji dan Tunjangan ASN","kode_rekening":"5.1.01.01.002.00002","uraian":"Belanja Tunjangan Keluarga PPPK","pagu":338176112.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.02.0001","sub_kegiatan":"Penyediaan Gaji dan Tunjangan ASN","kode_rekening":"5.1.01.01.003.00001","uraian":"Belanja Tunjangan Jabatan PNS","pagu":224000000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.02.0001","sub_kegiatan":"Penyediaan Gaji dan Tunjangan ASN","kode_rekening":"5.1.01.01.004.00001","uraian":"Belanja Tunjangan Fungsional PNS","pagu":8760000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.02.0001","sub_kegiatan":"Penyediaan Gaji dan Tunjangan ASN","kode_rekening":"5.1.01.01.004.00002","uraian":"Belanja Tunjangan Fungsional PPPK","pagu":432550000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.02.0001","sub_kegiatan":"Penyediaan Gaji dan Tunjangan ASN","kode_rekening":"5.1.01.01.005.00001","uraian":"Belanja Tunjangan Fungsional Umum PNS","pagu":259910000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.02.0001","sub_kegiatan":"Penyediaan Gaji dan Tunjangan ASN","kode_rekening":"5.1.01.01.006.00001","uraian":"Belanja Tunjangan Beras PNS","pagu":344000000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.02.0001","sub_kegiatan":"Penyediaan Gaji dan Tunjangan ASN","kode_rekening":"5.1.01.01.006.00002","uraian":"Belanja Tunjangan Beras PPPK","pagu":285914160.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.02.0001","sub_kegiatan":"Penyediaan Gaji dan Tunjangan ASN","kode_rekening":"5.1.01.01.007.00001","uraian":"Belanja Tunjangan PPh/Tunjangan Khusus PNS","pagu":1458066956.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.02.0001","sub_kegiatan":"Penyediaan Gaji dan Tunjangan ASN","kode_rekening":"5.1.01.01.007.00002","uraian":"Belanja Tunjangan PPh/Tunjangan Khusus PPPK","pagu":100000000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.02.0001","sub_kegiatan":"Penyediaan Gaji dan Tunjangan ASN","kode_rekening":"5.1.01.01.008.00001","uraian":"Belanja Pembulatan Gaji PNS","pagu":105545.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.02.0001","sub_kegiatan":"Penyediaan Gaji dan Tunjangan ASN","kode_rekening":"5.1.01.01.008.00002","uraian":"Belanja Pembulatan Gaji PPPK","pagu":75484.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.02.0001","sub_kegiatan":"Penyediaan Gaji dan Tunjangan ASN","kode_rekening":"5.1.01.02.001.00001","uraian":"Tambahan Penghasilan berdasarkan Beban Kerja PNS","pagu":6283959055.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.02.0001","sub_kegiatan":"Penyediaan Gaji dan Tunjangan ASN","kode_rekening":"5.1.01.02.001.00002","uraian":"Tambahan Penghasilan berdasarkan Beban Kerja PPPK","pagu":4150000000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.02.0001","sub_kegiatan":"Penyediaan Gaji dan Tunjangan ASN","kode_rekening":"5.1.01.02.003.00001","uraian":"Tambahan Penghasilan berdasarkan Kondisi Kerja PNS","pagu":1410000000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.02.0001","sub_kegiatan":"Penyediaan Gaji dan Tunjangan ASN","kode_rekening":"5.1.01.02.005.00001","uraian":"Tambahan Penghasilan berdasarkan Prestasi Kerja PNS","pagu":4750000000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.02.0001","sub_kegiatan":"Penyediaan Gaji dan Tunjangan ASN","kode_rekening":"5.1.01.02.005.00002","uraian":"Tambahan Penghasilan berdasarkan Prestasi Kerja PPPK","pagu":1830000000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.02.0001","sub_kegiatan":"Penyediaan Gaji dan Tunjangan ASN","kode_rekening":"5.1.01.02.006.00069","uraian":"Belanja Jasa Pengelolaan BMD yang Tidak Menghasilkan Pendapatan","pagu":39057908.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.05.0002","sub_kegiatan":"Pengadaan Pakaian Dinas beserta Atribut Kelengkapannya","kode_rekening":"5.1.02.01.001.00068","uraian":"Belanja Pakaian Siaga","pagu":61938000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.06.0001","sub_kegiatan":"Penyediaan Komponen Instalasi  Listrik/Penerangan Bangunan Kantor","kode_rekening":"5.1.02.01.001.00031","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Alat Listrik","pagu":145374452.25,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.06.0002","sub_kegiatan":"Penyediaan Peralatan dan Perlengkapan Kantor","kode_rekening":"5.1.02.01.001.00024","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Alat Tulis Kantor","pagu":29395688.87,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.06.0002","sub_kegiatan":"Penyediaan Peralatan dan Perlengkapan Kantor","kode_rekening":"5.1.02.01.001.00025","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor- Kertas dan Cover","pagu":46245708.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.06.0002","sub_kegiatan":"Penyediaan Peralatan dan Perlengkapan Kantor","kode_rekening":"5.1.02.01.001.00029","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Bahan Komputer","pagu":31912500.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.06.0002","sub_kegiatan":"Penyediaan Peralatan dan Perlengkapan Kantor","kode_rekening":"5.2.02.05.002.00006","uraian":"Belanja Modal Alat Rumah Tangga Lainnya (Home Use)","pagu":9301356.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.06.0002","sub_kegiatan":"Penyediaan Peralatan dan Perlengkapan Kantor","kode_rekening":"5.2.02.10.002.00003","uraian":"Belanja Modal Peralatan Personal Computer","pagu":19014300.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.06.0002","sub_kegiatan":"Penyediaan Peralatan dan Perlengkapan Kantor","kode_rekening":"5.2.02.13.001.00003","uraian":"Belanja Modal Sumur Lainnya","pagu":23504250.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.06.0003","sub_kegiatan":"Penyediaan Peralatan Rumah Tangga","kode_rekening":"5.1.02.01.001.00030","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Perabot Kantor","pagu":75249060.06,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.06.0004","sub_kegiatan":"Penyediaan Bahan Logistik Kantor","kode_rekening":"5.1.02.01.001.00036","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Alat/Bahan untuk Kegiatan Kantor Lainnya","pagu":77337600.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.06.0004","sub_kegiatan":"Penyediaan Bahan Logistik Kantor","kode_rekening":"5.1.02.01.001.00043","uraian":"Belanja Natura dan Pakan-Natura","pagu":214087645.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.06.0004","sub_kegiatan":"Penyediaan Bahan Logistik Kantor","kode_rekening":"5.1.02.01.001.00052","uraian":"Belanja Makanan dan Minuman Rapat","pagu":66300000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.06.0005","sub_kegiatan":"Penyediaan Barang Cetakan dan Penggandaan","kode_rekening":"5.1.02.01.001.00024","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Alat Tulis Kantor","pagu":20868000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.06.0005","sub_kegiatan":"Penyediaan Barang Cetakan dan Penggandaan","kode_rekening":"5.1.02.01.001.00026","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor- Bahan Cetak","pagu":31350000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.06.0005","sub_kegiatan":"Penyediaan Barang Cetakan dan Penggandaan","kode_rekening":"5.1.02.01.001.00027","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Benda Pos","pagu":5000000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.06.0008","sub_kegiatan":"Fasilitasi Kunjungan Tamu","kode_rekening":"5.1.02.01.001.00035","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor- Suvenir/Cendera Mata","pagu":44311200.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.06.0008","sub_kegiatan":"Fasilitasi Kunjungan Tamu","kode_rekening":"5.1.02.01.001.00053","uraian":"Belanja Makanan dan Minuman Jamuan Tamu","pagu":20556000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.06.0009","sub_kegiatan":"Penyelenggaraan Rapat Koordinasi dan Konsultasi SKPD","kode_rekening":"5.1.02.04.001.00001","uraian":"Belanja Perjalanan Dinas Biasa","pagu":265842000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.08.0002","sub_kegiatan":"Penyediaan Jasa Komunikasi, Sumber Daya Air dan Listrik","kode_rekening":"5.1.02.02.001.00059","uraian":"Belanja Tagihan Telepon","pagu":18900000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.08.0002","sub_kegiatan":"Penyediaan Jasa Komunikasi, Sumber Daya Air dan Listrik","kode_rekening":"5.1.02.02.001.00060","uraian":"Belanja Tagihan Air","pagu":36312000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.08.0002","sub_kegiatan":"Penyediaan Jasa Komunikasi, Sumber Daya Air dan Listrik","kode_rekening":"5.1.02.02.001.00061","uraian":"Belanja Tagihan Listrik","pagu":159516800.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.08.0002","sub_kegiatan":"Penyediaan Jasa Komunikasi, Sumber Daya Air dan Listrik","kode_rekening":"5.1.02.02.001.00063","uraian":"Belanja Kawat/Faksimili/Internet/TV Berlangganan","pagu":398640000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.08.0003","sub_kegiatan":"Penyediaan Jasa Peralatan dan Perlengkapan Kantor","kode_rekening":"5.1.02.02.004.00117","uraian":"Belanja Sewa Alat Kantor Lainnya","pagu":78672000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.08.0004","sub_kegiatan":"Penyediaan Jasa Pelayanan Umum Kantor","kode_rekening":"5.1.02.01.001.00024","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Alat Tulis Kantor","pagu":263206.56,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.08.0004","sub_kegiatan":"Penyediaan Jasa Pelayanan Umum Kantor","kode_rekening":"5.1.02.02.001.00007","uraian":"Honorarium Rohaniwan","pagu":34188000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.08.0004","sub_kegiatan":"Penyediaan Jasa Pelayanan Umum Kantor","kode_rekening":"5.1.02.02.001.00016","uraian":"Belanja Jasa Tenaga Penanganan Prasarana dan Sarana Umum","pagu":62976000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.08.0004","sub_kegiatan":"Penyediaan Jasa Pelayanan Umum Kantor","kode_rekening":"5.1.02.02.001.00029","uraian":"Belanja Jasa Tenaga Ahli","pagu":411540000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.08.0004","sub_kegiatan":"Penyediaan Jasa Pelayanan Umum Kantor","kode_rekening":"5.1.02.02.001.00030","uraian":"Belanja Jasa Tenaga Kebersihan","pagu":682353363.6,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.08.0004","sub_kegiatan":"Penyediaan Jasa Pelayanan Umum Kantor","kode_rekening":"5.1.02.02.001.00031","uraian":"Belanja Jasa Tenaga Keamanan","pagu":1995641640.72,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.08.0004","sub_kegiatan":"Penyediaan Jasa Pelayanan Umum Kantor","kode_rekening":"5.1.02.02.001.00033","uraian":"Belanja Jasa Tenaga Supir","pagu":315813097.44,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.08.0004","sub_kegiatan":"Penyediaan Jasa Pelayanan Umum Kantor","kode_rekening":"5.1.02.02.001.00088","uraian":"Belanja jasa Pegawai Pemerintah dengan Perjanjian Kerja (PPPK) Paruh Waktu pada jabatan operator layanan operasional","pagu":4723200000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.08.0004","sub_kegiatan":"Penyediaan Jasa Pelayanan Umum Kantor","kode_rekening":"5.1.02.02.001.00089","uraian":"Belanja jasa Pegawai Pemerintah dengan Perjanjian Kerja (PPPK) Paruh Waktu pada jabatan pengelola layanan operasional","pagu":345600000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.08.0004","sub_kegiatan":"Penyediaan Jasa Pelayanan Umum Kantor","kode_rekening":"5.1.02.02.001.00090","uraian":"Belanja jasa Pegawai Pemerintah dengan Perjanjian Kerja (PPPK) Paruh Waktu pada jabatan penata layanan operasional","pagu":2476800000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.09.0002","sub_kegiatan":"Penyediaan Jasa Pemeliharaan, Biaya Pemeliharaan, Pajak dan Perizinan Kendaraan Dinas Operasional atau Lapangan","kode_rekening":"5.1.02.01.001.00004","uraian":"Belanja Bahan-Bahan Bakar dan Pelumas","pagu":569800000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.09.0002","sub_kegiatan":"Penyediaan Jasa Pemeliharaan, Biaya Pemeliharaan, Pajak dan Perizinan Kendaraan Dinas Operasional atau Lapangan","kode_rekening":"5.1.02.01.001.00024","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Alat Tulis Kantor","pagu":89625.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.09.0002","sub_kegiatan":"Penyediaan Jasa Pemeliharaan, Biaya Pemeliharaan, Pajak dan Perizinan Kendaraan Dinas Operasional atau Lapangan","kode_rekening":"5.1.02.02.001.00067","uraian":"Belanja Pembayaran Pajak, Bea, dan Perizinan","pagu":87123700.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.09.0002","sub_kegiatan":"Penyediaan Jasa Pemeliharaan, Biaya Pemeliharaan, Pajak dan Perizinan Kendaraan Dinas Operasional atau Lapangan","kode_rekening":"5.1.02.03.002.00035","uraian":"Belanja Pemeliharaan Alat Angkutan-Alat Angkutan Darat Bermotor-Kendaraan Dinas Bermotor Perorangan","pagu":336730000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.09.0009","sub_kegiatan":"Pemeliharaan/Rehabilitasi Gedung Kantor dan Bangunan Lainnya","kode_rekening":"5.1.02.01.001.00012","uraian":"Belanja Bahan-Bahan Lainnya","pagu":377043.85,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.09.0009","sub_kegiatan":"Pemeliharaan/Rehabilitasi Gedung Kantor dan Bangunan Lainnya","kode_rekening":"5.1.02.01.001.00026","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor- Bahan Cetak","pagu":6216000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.09.0009","sub_kegiatan":"Pemeliharaan/Rehabilitasi Gedung Kantor dan Bangunan Lainnya","kode_rekening":"5.1.02.01.001.00029","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Bahan Komputer","pagu":275058.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.09.0009","sub_kegiatan":"Pemeliharaan/Rehabilitasi Gedung Kantor dan Bangunan Lainnya","kode_rekening":"5.1.02.02.008.00001","uraian":"Belanja Jasa Konsultansi Perencanaan Arsitektur-Jasa Nasihat dan Pra Desain Arsitektural","pagu":52917000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.09.0009","sub_kegiatan":"Pemeliharaan/Rehabilitasi Gedung Kantor dan Bangunan Lainnya","kode_rekening":"5.1.02.02.008.00019","uraian":"Belanja Jasa Konsultansi Pengawasan Rekayasa-Jasa Pengawas Pekerjaan Konstruksi Bangunan Gedung","pagu":114222000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.09.0009","sub_kegiatan":"Pemeliharaan/Rehabilitasi Gedung Kantor dan Bangunan Lainnya","kode_rekening":"5.1.02.03.003.00001","uraian":"Belanja Pemeliharaan Bangunan Gedung-Bangunan Gedung Tempat Kerja-Bangunan Gedung Kantor","pagu":74103600.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.09.0009","sub_kegiatan":"Pemeliharaan/Rehabilitasi Gedung Kantor dan Bangunan Lainnya","kode_rekening":"5.2.03.01.001.00001","uraian":"Belanja Modal Bangunan Gedung Kantor","pagu":2043242268.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.09.0009","sub_kegiatan":"Pemeliharaan/Rehabilitasi Gedung Kantor dan Bangunan Lainnya","kode_rekening":"5.2.03.01.001.00032","uraian":"Belanja Modal Bangunan Fasilitas Umum","pagu":165501000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.09.0011","sub_kegiatan":"Pemeliharaan/Rehabilitasi Sarana dan Prasarana Pendukung Gedung Kantor atau Bangunan Lainnya","kode_rekening":"5.1.02.02.001.00052","uraian":"Belanja Jasa Pembersihan, Pengendalian Hama, dan Fumigasi","pagu":26640000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0001","sub_unit":"Sekretariat","sub_kegiatan_code":"1.05.01.2.09.0011","sub_kegiatan":"Pemeliharaan/Rehabilitasi Sarana dan Prasarana Pendukung Gedung Kantor atau Bangunan Lainnya","kode_rekening":"5.1.02.03.002.00117","uraian":"Belanja Pemeliharaan Alat Kantor dan Rumah Tangga-Alat Kantor-Alat Kantor Lainnya","pagu":47119500.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0002","sub_unit":"Bidang Pencegahan","sub_kegiatan_code":"1.05.04.2.01.0001","sub_kegiatan":"Pencegahan Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00052","uraian":"Belanja Makanan dan Minuman Rapat","pagu":2640000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0002","sub_unit":"Bidang Pencegahan","sub_kegiatan_code":"1.05.04.2.01.0001","sub_kegiatan":"Pencegahan Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.02.001.00003","uraian":"Honorarium Narasumber atau Pembahas, Moderator, Pembawa Acara, dan Panitia","pagu":22400000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0002","sub_unit":"Bidang Pencegahan","sub_kegiatan_code":"1.05.04.2.01.0001","sub_kegiatan":"Pencegahan Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.02.001.00026","uraian":"Belanja Jasa Tenaga Administrasi","pagu":9000000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0002","sub_unit":"Bidang Pencegahan","sub_kegiatan_code":"1.05.04.2.01.0001","sub_kegiatan":"Pencegahan Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.02.001.00029","uraian":"Belanja Jasa Tenaga Ahli","pagu":84890000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0002","sub_unit":"Bidang Pencegahan","sub_kegiatan_code":"1.05.04.2.01.0007","sub_kegiatan":"Pembinaan Aparatur Pemadam Kebakaran","kode_rekening":"5.1.02.01.001.00024","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Alat Tulis Kantor","pagu":278060.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0002","sub_unit":"Bidang Pencegahan","sub_kegiatan_code":"1.05.04.2.01.0007","sub_kegiatan":"Pembinaan Aparatur Pemadam Kebakaran","kode_rekening":"5.1.02.01.001.00026","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor- Bahan Cetak","pagu":1431000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0002","sub_unit":"Bidang Pencegahan","sub_kegiatan_code":"1.05.04.2.01.0007","sub_kegiatan":"Pembinaan Aparatur Pemadam Kebakaran","kode_rekening":"5.1.02.01.001.00052","uraian":"Belanja Makanan dan Minuman Rapat","pagu":85020000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0002","sub_unit":"Bidang Pencegahan","sub_kegiatan_code":"1.05.04.2.01.0007","sub_kegiatan":"Pembinaan Aparatur Pemadam Kebakaran","kode_rekening":"5.1.02.02.001.00003","uraian":"Honorarium Narasumber atau Pembahas, Moderator, Pembawa Acara, dan Panitia","pagu":16800000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0002","sub_unit":"Bidang Pencegahan","sub_kegiatan_code":"1.05.04.2.01.0007","sub_kegiatan":"Pembinaan Aparatur Pemadam Kebakaran","kode_rekening":"5.1.02.02.001.00029","uraian":"Belanja Jasa Tenaga Ahli","pagu":55800000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0002","sub_unit":"Bidang Pencegahan","sub_kegiatan_code":"1.05.04.2.01.0007","sub_kegiatan":"Pembinaan Aparatur Pemadam Kebakaran","kode_rekening":"5.1.02.02.005.00043","uraian":"Belanja Sewa Hotel","pagu":40800000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0002","sub_unit":"Bidang Pencegahan","sub_kegiatan_code":"1.05.04.2.01.0007","sub_kegiatan":"Pembinaan Aparatur Pemadam Kebakaran","kode_rekening":"5.1.02.02.012.00001","uraian":"Belanja Kursus Singkat/Pelatihan","pagu":46080000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0002","sub_unit":"Bidang Pencegahan","sub_kegiatan_code":"1.05.04.2.01.0007","sub_kegiatan":"Pembinaan Aparatur Pemadam Kebakaran","kode_rekening":"5.1.02.04.001.00001","uraian":"Belanja Perjalanan Dinas Biasa","pagu":7200000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0002","sub_unit":"Bidang Pencegahan","sub_kegiatan_code":"1.05.04.2.01.0013","sub_kegiatan":"Penyusunan Kajian Rencana Induk Sistem Penanggulangan Kebakaran dan Penyelamatan (RISPKP)","kode_rekening":"5.1.02.01.001.00024","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Alat Tulis Kantor","pagu":44000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0002","sub_unit":"Bidang Pencegahan","sub_kegiatan_code":"1.05.04.2.01.0013","sub_kegiatan":"Penyusunan Kajian Rencana Induk Sistem Penanggulangan Kebakaran dan Penyelamatan (RISPKP)","kode_rekening":"5.1.02.01.001.00052","uraian":"Belanja Makanan dan Minuman Rapat","pagu":22176000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0002","sub_unit":"Bidang Pencegahan","sub_kegiatan_code":"1.05.04.2.01.0013","sub_kegiatan":"Penyusunan Kajian Rencana Induk Sistem Penanggulangan Kebakaran dan Penyelamatan (RISPKP)","kode_rekening":"5.1.02.02.001.00026","uraian":"Belanja Jasa Tenaga Administrasi","pagu":31500000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0002","sub_unit":"Bidang Pencegahan","sub_kegiatan_code":"1.05.04.2.01.0013","sub_kegiatan":"Penyusunan Kajian Rencana Induk Sistem Penanggulangan Kebakaran dan Penyelamatan (RISPKP)","kode_rekening":"5.1.02.02.001.00029","uraian":"Belanja Jasa Tenaga Ahli","pagu":727710700.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0002","sub_unit":"Bidang Pencegahan","sub_kegiatan_code":"1.05.04.2.01.0019","sub_kegiatan":"Pelatihan Keluarga Tanggap Kebakaran Rumah Tangga","kode_rekening":"5.1.02.01.001.00004","uraian":"Belanja Bahan-Bahan Bakar dan Pelumas","pagu":840000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0002","sub_unit":"Bidang Pencegahan","sub_kegiatan_code":"1.05.04.2.01.0019","sub_kegiatan":"Pelatihan Keluarga Tanggap Kebakaran Rumah Tangga","kode_rekening":"5.1.02.01.001.00009","uraian":"Belanja Bahan-Isi Tabung Pemadam Kebakaran","pagu":25197000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0002","sub_unit":"Bidang Pencegahan","sub_kegiatan_code":"1.05.04.2.01.0019","sub_kegiatan":"Pelatihan Keluarga Tanggap Kebakaran Rumah Tangga","kode_rekening":"5.1.02.01.001.00036","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Alat/Bahan untuk Kegiatan Kantor Lainnya","pagu":1953600.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0002","sub_unit":"Bidang Pencegahan","sub_kegiatan_code":"1.05.04.2.01.0019","sub_kegiatan":"Pelatihan Keluarga Tanggap Kebakaran Rumah Tangga","kode_rekening":"5.1.02.01.001.00058","uraian":"Belanja Makanan dan Minuman Aktivitas Lapangan","pagu":79200000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0002","sub_unit":"Bidang Pencegahan","sub_kegiatan_code":"1.05.04.2.01.0019","sub_kegiatan":"Pelatihan Keluarga Tanggap Kebakaran Rumah Tangga","kode_rekening":"5.2.02.05.001.00005","uraian":"Belanja Modal Alat Kantor Lainnya","pagu":94905000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0002","sub_unit":"Bidang Pencegahan","sub_kegiatan_code":"1.05.04.2.02.0001","sub_kegiatan":"Pendataan Sarana Prasarana Proteksi Kebakaran","kode_rekening":"5.1.02.01.001.00058","uraian":"Belanja Makanan dan Minuman Aktivitas Lapangan","pagu":49962000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0002","sub_unit":"Bidang Pencegahan","sub_kegiatan_code":"1.05.04.2.04.0001","sub_kegiatan":"Pemberdayaan Masyarakat dalam Pencegahan dan Penanggulangan Kebakaran Melalui Sosialisasi dan Edukasi Masyarakat","kode_rekening":"5.1.02.01.001.00024","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Alat Tulis Kantor","pagu":22000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0002","sub_unit":"Bidang Pencegahan","sub_kegiatan_code":"1.05.04.2.04.0001","sub_kegiatan":"Pemberdayaan Masyarakat dalam Pencegahan dan Penanggulangan Kebakaran Melalui Sosialisasi dan Edukasi Masyarakat","kode_rekening":"5.1.02.01.001.00052","uraian":"Belanja Makanan dan Minuman Rapat","pagu":63818000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0002","sub_unit":"Bidang Pencegahan","sub_kegiatan_code":"1.05.04.2.04.0001","sub_kegiatan":"Pemberdayaan Masyarakat dalam Pencegahan dan Penanggulangan Kebakaran Melalui Sosialisasi dan Edukasi Masyarakat","kode_rekening":"5.1.02.01.001.00058","uraian":"Belanja Makanan dan Minuman Aktivitas Lapangan","pagu":89990000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0002","sub_unit":"Bidang Pencegahan","sub_kegiatan_code":"1.05.04.2.04.0001","sub_kegiatan":"Pemberdayaan Masyarakat dalam Pencegahan dan Penanggulangan Kebakaran Melalui Sosialisasi dan Edukasi Masyarakat","kode_rekening":"5.1.02.02.001.00003","uraian":"Honorarium Narasumber atau Pembahas, Moderator, Pembawa Acara, dan Panitia","pagu":16800000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0002","sub_unit":"Bidang Pencegahan","sub_kegiatan_code":"1.05.04.2.04.0001","sub_kegiatan":"Pemberdayaan Masyarakat dalam Pencegahan dan Penanggulangan Kebakaran Melalui Sosialisasi dan Edukasi Masyarakat","kode_rekening":"5.1.02.04.001.00003","uraian":"Belanja Perjalanan Dinas Dalam Kota","pagu":136000000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0002","sub_unit":"Bidang Pencegahan","sub_kegiatan_code":"1.05.04.2.04.0002","sub_kegiatan":"Pembentukan dan Pembinaan Relawan Pemadam Kebakaran","kode_rekening":"5.1.02.01.001.00039","uraian":"Belanja Barang untuk Dijual/Diserahkan kepada Masyarakat","pagu":3151678500.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0002","sub_unit":"Bidang Pencegahan","sub_kegiatan_code":"1.05.04.2.04.0002","sub_kegiatan":"Pembentukan dan Pembinaan Relawan Pemadam Kebakaran","kode_rekening":"5.1.02.02.012.00001","uraian":"Belanja Kursus Singkat/Pelatihan","pagu":720000000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0003","sub_unit":"Bidang Pemadaman","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00032","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Perlengkapan Dinas","pagu":16017300.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0003","sub_unit":"Bidang Pemadaman","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00052","uraian":"Belanja Makanan dan Minuman Rapat","pagu":66840000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0003","sub_unit":"Bidang Pemadaman","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00053","uraian":"Belanja Makanan dan Minuman Jamuan Tamu","pagu":90750000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0003","sub_unit":"Bidang Pemadaman","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00058","uraian":"Belanja Makanan dan Minuman Aktivitas Lapangan","pagu":743325000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0003","sub_unit":"Bidang Pemadaman","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00064","uraian":"Belanja Pakaian Dinas Lapangan (PDL)","pagu":4073160.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0003","sub_unit":"Bidang Pemadaman","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00068","uraian":"Belanja Pakaian Siaga","pagu":1509000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0003","sub_unit":"Bidang Pemadaman","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00076","uraian":"Belanja Pakaian Olahraga","pagu":31726974.6,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0003","sub_unit":"Bidang Pemadaman","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.02.001.00003","uraian":"Honorarium Narasumber atau Pembahas, Moderator, Pembawa Acara, dan Panitia","pagu":5400000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0003","sub_unit":"Bidang Pemadaman","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.02.001.00047","uraian":"Belanja Jasa Penyelenggaraan Acara","pagu":60000000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0003","sub_unit":"Bidang Pemadaman","sub_kegiatan_code":"1.05.04.2.03.0004","sub_kegiatan":"Penyusunan Laporan Lanjutan Penyebab Kebakaran","kode_rekening":"5.1.02.01.001.00052","uraian":"Belanja Makanan dan Minuman Rapat","pagu":73269000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0003","sub_unit":"Bidang Pemadaman","sub_kegiatan_code":"1.05.04.2.03.0004","sub_kegiatan":"Penyusunan Laporan Lanjutan Penyebab Kebakaran","kode_rekening":"5.1.02.01.001.00058","uraian":"Belanja Makanan dan Minuman Aktivitas Lapangan","pagu":26730000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0004","sub_unit":"Bidang Penyelamatan","sub_kegiatan_code":"1.05.04.2.01.0003","sub_kegiatan":"Penyelamatan dan Evakuasi Korban Kebakaran dan Non Kebakaran","kode_rekening":"5.1.02.01.001.00024","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Alat Tulis Kantor","pagu":35000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0004","sub_unit":"Bidang Penyelamatan","sub_kegiatan_code":"1.05.04.2.01.0003","sub_kegiatan":"Penyelamatan dan Evakuasi Korban Kebakaran dan Non Kebakaran","kode_rekening":"5.1.02.01.001.00058","uraian":"Belanja Makanan dan Minuman Aktivitas Lapangan","pagu":142765000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0004","sub_unit":"Bidang Penyelamatan","sub_kegiatan_code":"1.05.04.2.01.0018","sub_kegiatan":"Penyelenggaraan Kerja Sama dan Koordinasi antar Daerah Berbatasan, antar Lembaga, dan Kemitraan dalam Pencegahan, Penanggulangan, Penyelamatan Kebakaran dan Penyelamatan Non Kebakaran","kode_rekening":"5.1.02.01.001.00052","uraian":"Belanja Makanan dan Minuman Rapat","pagu":52740000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0004","sub_unit":"Bidang Penyelamatan","sub_kegiatan_code":"1.05.04.2.05.0001","sub_kegiatan":"Penyelenggaraan Operasi Pencarian dan Pertolongan pada Peristiwa yang Menimpa, Membahayakan, dan/atau Mengancam Keselamatan Manusia","kode_rekening":"5.1.02.01.001.00058","uraian":"Belanja Makanan dan Minuman Aktivitas Lapangan","pagu":43200000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0005","sub_unit":"Bidang Sarana Prasarana dan Data Informasi","sub_kegiatan_code":"1.05.04.2.01.0005","sub_kegiatan":"Standarisasi Sarana dan Prasarana Pencegahan, Penanggulangan Kebakaran dan Alat Pelindung Diri","kode_rekening":"5.1.02.01.001.00004","uraian":"Belanja Bahan-Bahan Bakar dan Pelumas","pagu":796413200.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0005","sub_unit":"Bidang Sarana Prasarana dan Data Informasi","sub_kegiatan_code":"1.05.04.2.01.0005","sub_kegiatan":"Standarisasi Sarana dan Prasarana Pencegahan, Penanggulangan Kebakaran dan Alat Pelindung Diri","kode_rekening":"5.1.02.01.001.00018","uraian":"Belanja Suku Cadang-Suku Cadang Alat Studio dan Komunikasi","pagu":22821600.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0005","sub_unit":"Bidang Sarana Prasarana dan Data Informasi","sub_kegiatan_code":"1.05.04.2.01.0005","sub_kegiatan":"Standarisasi Sarana dan Prasarana Pencegahan, Penanggulangan Kebakaran dan Alat Pelindung Diri","kode_rekening":"5.1.02.01.001.00024","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Alat Tulis Kantor","pagu":2676.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0005","sub_unit":"Bidang Sarana Prasarana dan Data Informasi","sub_kegiatan_code":"1.05.04.2.01.0005","sub_kegiatan":"Standarisasi Sarana dan Prasarana Pencegahan, Penanggulangan Kebakaran dan Alat Pelindung Diri","kode_rekening":"5.1.02.01.001.00030","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Perabot Kantor","pagu":15864144.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0005","sub_unit":"Bidang Sarana Prasarana dan Data Informasi","sub_kegiatan_code":"1.05.04.2.01.0005","sub_kegiatan":"Standarisasi Sarana dan Prasarana Pencegahan, Penanggulangan Kebakaran dan Alat Pelindung Diri","kode_rekening":"5.1.02.01.001.00036","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Alat/Bahan untuk Kegiatan Kantor Lainnya","pagu":8250000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0005","sub_unit":"Bidang Sarana Prasarana dan Data Informasi","sub_kegiatan_code":"1.05.04.2.01.0005","sub_kegiatan":"Standarisasi Sarana dan Prasarana Pencegahan, Penanggulangan Kebakaran dan Alat Pelindung Diri","kode_rekening":"5.1.02.01.001.00052","uraian":"Belanja Makanan dan Minuman Rapat","pagu":13200000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0005","sub_unit":"Bidang Sarana Prasarana dan Data Informasi","sub_kegiatan_code":"1.05.04.2.01.0005","sub_kegiatan":"Standarisasi Sarana dan Prasarana Pencegahan, Penanggulangan Kebakaran dan Alat Pelindung Diri","kode_rekening":"5.1.02.02.003.00007","uraian":"Belanja Sewa Tanah Persil Lainnya","pagu":13500000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0005","sub_unit":"Bidang Sarana Prasarana dan Data Informasi","sub_kegiatan_code":"1.05.04.2.01.0005","sub_kegiatan":"Standarisasi Sarana dan Prasarana Pencegahan, Penanggulangan Kebakaran dan Alat Pelindung Diri","kode_rekening":"5.1.02.02.010.00008","uraian":"Belanja Jasa Ketersediaan Layanan (Availibility Payment) Infrastruktur Telekomunikasi dan Informatika","pagu":10000000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0005","sub_unit":"Bidang Sarana Prasarana dan Data Informasi","sub_kegiatan_code":"1.05.04.2.01.0005","sub_kegiatan":"Standarisasi Sarana dan Prasarana Pencegahan, Penanggulangan Kebakaran dan Alat Pelindung Diri","kode_rekening":"5.1.02.03.002.00035","uraian":"Belanja Pemeliharaan Alat Angkutan-Alat Angkutan Darat Bermotor-Kendaraan Dinas Bermotor Perorangan","pagu":837125000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0005","sub_unit":"Bidang Sarana Prasarana dan Data Informasi","sub_kegiatan_code":"1.05.04.2.01.0005","sub_kegiatan":"Standarisasi Sarana dan Prasarana Pencegahan, Penanggulangan Kebakaran dan Alat Pelindung Diri","kode_rekening":"5.1.02.03.002.00442","uraian":"Belanja Pemeliharaan Alat Bantu Eksplorasi-Alat Bantu Produksi-Alat Bantu Produksi Lainnya","pagu":105000000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0005","sub_unit":"Bidang Sarana Prasarana dan Data Informasi","sub_kegiatan_code":"1.05.04.2.01.0008","sub_kegiatan":"Pengelolaan Sistem Komunikasi dan Informasi Kebakaran dan Penyelamatan (SKIK)","kode_rekening":"5.1.02.01.001.00018","uraian":"Belanja Suku Cadang-Suku Cadang Alat Studio dan Komunikasi","pagu":1644748.05,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0005","sub_unit":"Bidang Sarana Prasarana dan Data Informasi","sub_kegiatan_code":"1.05.04.2.01.0008","sub_kegiatan":"Pengelolaan Sistem Komunikasi dan Informasi Kebakaran dan Penyelamatan (SKIK)","kode_rekening":"5.1.02.01.001.00024","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Alat Tulis Kantor","pagu":6937500.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0005","sub_unit":"Bidang Sarana Prasarana dan Data Informasi","sub_kegiatan_code":"1.05.04.2.01.0008","sub_kegiatan":"Pengelolaan Sistem Komunikasi dan Informasi Kebakaran dan Penyelamatan (SKIK)","kode_rekening":"5.1.02.01.001.00026","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor- Bahan Cetak","pagu":2726171.18,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0005","sub_unit":"Bidang Sarana Prasarana dan Data Informasi","sub_kegiatan_code":"1.05.04.2.01.0008","sub_kegiatan":"Pengelolaan Sistem Komunikasi dan Informasi Kebakaran dan Penyelamatan (SKIK)","kode_rekening":"5.1.02.01.001.00052","uraian":"Belanja Makanan dan Minuman Rapat","pagu":16221000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0005","sub_unit":"Bidang Sarana Prasarana dan Data Informasi","sub_kegiatan_code":"1.05.04.2.01.0008","sub_kegiatan":"Pengelolaan Sistem Komunikasi dan Informasi Kebakaran dan Penyelamatan (SKIK)","kode_rekening":"5.1.02.02.001.00003","uraian":"Honorarium Narasumber atau Pembahas, Moderator, Pembawa Acara, dan Panitia","pagu":3600000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0005","sub_unit":"Bidang Sarana Prasarana dan Data Informasi","sub_kegiatan_code":"1.05.04.2.01.0008","sub_kegiatan":"Pengelolaan Sistem Komunikasi dan Informasi Kebakaran dan Penyelamatan (SKIK)","kode_rekening":"5.1.02.02.001.00029","uraian":"Belanja Jasa Tenaga Ahli","pagu":486000000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0005","sub_unit":"Bidang Sarana Prasarana dan Data Informasi","sub_kegiatan_code":"1.05.04.2.01.0008","sub_kegiatan":"Pengelolaan Sistem Komunikasi dan Informasi Kebakaran dan Penyelamatan (SKIK)","kode_rekening":"5.1.02.02.001.00046","uraian":"Belanja Jasa Konversi Aplikasi/Sistem Informasi","pagu":19266000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0005","sub_unit":"Bidang Sarana Prasarana dan Data Informasi","sub_kegiatan_code":"1.05.04.2.01.0008","sub_kegiatan":"Pengelolaan Sistem Komunikasi dan Informasi Kebakaran dan Penyelamatan (SKIK)","kode_rekening":"5.1.02.02.001.00055","uraian":"Belanja Jasa Iklan/Reklame, Film, dan Pemotretan","pagu":26196000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0005","sub_unit":"Bidang Sarana Prasarana dan Data Informasi","sub_kegiatan_code":"1.05.04.2.01.0008","sub_kegiatan":"Pengelolaan Sistem Komunikasi dan Informasi Kebakaran dan Penyelamatan (SKIK)","kode_rekening":"5.1.02.02.001.00063","uraian":"Belanja Kawat/Faksimili/Internet/TV Berlangganan","pagu":65934000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0005","sub_unit":"Bidang Sarana Prasarana dan Data Informasi","sub_kegiatan_code":"1.05.04.2.01.0008","sub_kegiatan":"Pengelolaan Sistem Komunikasi dan Informasi Kebakaran dan Penyelamatan (SKIK)","kode_rekening":"5.1.02.03.002.00117","uraian":"Belanja Pemeliharaan Alat Kantor dan Rumah Tangga-Alat Kantor-Alat Kantor Lainnya","pagu":1665000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0005","sub_unit":"Bidang Sarana Prasarana dan Data Informasi","sub_kegiatan_code":"1.05.04.2.01.0008","sub_kegiatan":"Pengelolaan Sistem Komunikasi dan Informasi Kebakaran dan Penyelamatan (SKIK)","kode_rekening":"5.2.02.06.001.00002","uraian":"Belanja Modal Peralatan Studio Video dan Film","pagu":6753369.87,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0005","sub_unit":"Bidang Sarana Prasarana dan Data Informasi","sub_kegiatan_code":"1.05.04.2.01.0008","sub_kegiatan":"Pengelolaan Sistem Komunikasi dan Informasi Kebakaran dan Penyelamatan (SKIK)","kode_rekening":"5.2.02.06.002.00001","uraian":"Belanja Modal Alat Komunikasi Telephone","pagu":16650000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0005","sub_unit":"Bidang Sarana Prasarana dan Data Informasi","sub_kegiatan_code":"1.05.04.2.01.0017","sub_kegiatan":"Pengadaan Sarana dan Prasarana Pencegahan, Penanggulangan Kebakaran dan Alat Pelindung Diri","kode_rekening":"5.1.02.01.001.00002","uraian":"Belanja Bahan-Bahan Kimia","pagu":111000000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0005","sub_unit":"Bidang Sarana Prasarana dan Data Informasi","sub_kegiatan_code":"1.05.04.2.01.0017","sub_kegiatan":"Pengadaan Sarana dan Prasarana Pencegahan, Penanggulangan Kebakaran dan Alat Pelindung Diri","kode_rekening":"5.1.02.01.001.00013","uraian":"Belanja Suku Cadang-Suku Cadang Alat Angkutan","pagu":761544360.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0005","sub_unit":"Bidang Sarana Prasarana dan Data Informasi","sub_kegiatan_code":"1.05.04.2.01.0017","sub_kegiatan":"Pengadaan Sarana dan Prasarana Pencegahan, Penanggulangan Kebakaran dan Alat Pelindung Diri","kode_rekening":"5.1.02.01.001.00024","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Alat Tulis Kantor","pagu":381.1,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0005","sub_unit":"Bidang Sarana Prasarana dan Data Informasi","sub_kegiatan_code":"1.05.04.2.01.0017","sub_kegiatan":"Pengadaan Sarana dan Prasarana Pencegahan, Penanggulangan Kebakaran dan Alat Pelindung Diri","kode_rekening":"5.1.02.01.001.00027","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Benda Pos","pagu":500000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0005","sub_unit":"Bidang Sarana Prasarana dan Data Informasi","sub_kegiatan_code":"1.05.04.2.01.0017","sub_kegiatan":"Pengadaan Sarana dan Prasarana Pencegahan, Penanggulangan Kebakaran dan Alat Pelindung Diri","kode_rekening":"5.1.02.01.001.00036","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Alat/Bahan untuk Kegiatan Kantor Lainnya","pagu":183249900.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0005","sub_unit":"Bidang Sarana Prasarana dan Data Informasi","sub_kegiatan_code":"1.05.04.2.01.0017","sub_kegiatan":"Pengadaan Sarana dan Prasarana Pencegahan, Penanggulangan Kebakaran dan Alat Pelindung Diri","kode_rekening":"5.1.02.01.001.00052","uraian":"Belanja Makanan dan Minuman Rapat","pagu":6447000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0005","sub_unit":"Bidang Sarana Prasarana dan Data Informasi","sub_kegiatan_code":"1.05.04.2.01.0017","sub_kegiatan":"Pengadaan Sarana dan Prasarana Pencegahan, Penanggulangan Kebakaran dan Alat Pelindung Diri","kode_rekening":"5.1.02.02.002.00008","uraian":"Belanja Asuransi Barang Milik Daerah","pagu":253848120.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0005","sub_unit":"Bidang Sarana Prasarana dan Data Informasi","sub_kegiatan_code":"1.05.04.2.01.0017","sub_kegiatan":"Pengadaan Sarana dan Prasarana Pencegahan, Penanggulangan Kebakaran dan Alat Pelindung Diri","kode_rekening":"5.1.02.02.012.00001","uraian":"Belanja Kursus Singkat/Pelatihan","pagu":76923000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0005","sub_unit":"Bidang Sarana Prasarana dan Data Informasi","sub_kegiatan_code":"1.05.04.2.01.0017","sub_kegiatan":"Pengadaan Sarana dan Prasarana Pencegahan, Penanggulangan Kebakaran dan Alat Pelindung Diri","kode_rekening":"5.2.02.01.003.00006","uraian":"Belanja Modal Mesin Bor","pagu":13692000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0005","sub_unit":"Bidang Sarana Prasarana dan Data Informasi","sub_kegiatan_code":"1.05.04.2.01.0017","sub_kegiatan":"Pengadaan Sarana dan Prasarana Pencegahan, Penanggulangan Kebakaran dan Alat Pelindung Diri","kode_rekening":"5.2.02.02.001.00006","uraian":"Belanja Modal Kendaraan Bermotor Khusus","pagu":3869992800.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0005","sub_unit":"Bidang Sarana Prasarana dan Data Informasi","sub_kegiatan_code":"1.05.04.2.01.0017","sub_kegiatan":"Pengadaan Sarana dan Prasarana Pencegahan, Penanggulangan Kebakaran dan Alat Pelindung Diri","kode_rekening":"5.2.02.03.001.00006","uraian":"Belanja Modal Perkakas Bengkel Kayu","pagu":33300000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0005","sub_unit":"Bidang Sarana Prasarana dan Data Informasi","sub_kegiatan_code":"1.05.04.2.01.0017","sub_kegiatan":"Pengadaan Sarana dan Prasarana Pencegahan, Penanggulangan Kebakaran dan Alat Pelindung Diri","kode_rekening":"5.2.02.05.001.00005","uraian":"Belanja Modal Alat Kantor Lainnya","pagu":18951030.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0005","sub_unit":"Bidang Sarana Prasarana dan Data Informasi","sub_kegiatan_code":"1.05.04.2.01.0017","sub_kegiatan":"Pengadaan Sarana dan Prasarana Pencegahan, Penanggulangan Kebakaran dan Alat Pelindung Diri","kode_rekening":"5.2.02.05.002.00007","uraian":"Belanja Modal Alat Pemadam Kebakaran","pagu":9047138097.49,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0005","sub_unit":"Bidang Sarana Prasarana dan Data Informasi","sub_kegiatan_code":"1.05.04.2.01.0017","sub_kegiatan":"Pengadaan Sarana dan Prasarana Pencegahan, Penanggulangan Kebakaran dan Alat Pelindung Diri","kode_rekening":"5.2.02.06.001.00006","uraian":"Belanja Modal Alat Studio Lainnya","pagu":193330920.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0005","sub_unit":"Bidang Sarana Prasarana dan Data Informasi","sub_kegiatan_code":"1.05.04.2.01.0017","sub_kegiatan":"Pengadaan Sarana dan Prasarana Pencegahan, Penanggulangan Kebakaran dan Alat Pelindung Diri","kode_rekening":"5.2.02.06.002.00011","uraian":"Belanja Modal Alat Komunikasi Lainnya","pagu":200579220.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0005","sub_unit":"Bidang Sarana Prasarana dan Data Informasi","sub_kegiatan_code":"1.05.04.2.01.0017","sub_kegiatan":"Pengadaan Sarana dan Prasarana Pencegahan, Penanggulangan Kebakaran dan Alat Pelindung Diri","kode_rekening":"5.2.02.07.001.00001","uraian":"Belanja Modal Alat Kedokteran Umum","pagu":19980000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0005","sub_unit":"Bidang Sarana Prasarana dan Data Informasi","sub_kegiatan_code":"1.05.04.2.01.0017","sub_kegiatan":"Pengadaan Sarana dan Prasarana Pencegahan, Penanggulangan Kebakaran dan Alat Pelindung Diri","kode_rekening":"5.2.02.07.001.00029","uraian":"Belanja Modal Alat Kedokteran Lainnya","pagu":13750000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0005","sub_unit":"Bidang Sarana Prasarana dan Data Informasi","sub_kegiatan_code":"1.05.04.2.01.0017","sub_kegiatan":"Pengadaan Sarana dan Prasarana Pencegahan, Penanggulangan Kebakaran dan Alat Pelindung Diri","kode_rekening":"5.2.02.19.001.00006","uraian":"Belanja Modal Peralatan Olahraga Lainnya","pagu":365933.36,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0006","sub_unit":"UPT DKPB Wilayah Utara","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00009","uraian":"Belanja Bahan-Isi Tabung Pemadam Kebakaran","pagu":5020000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0006","sub_unit":"UPT DKPB Wilayah Utara","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00010","uraian":"Belanja Bahan-Isi Tabung Gas","pagu":1374000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0006","sub_unit":"UPT DKPB Wilayah Utara","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00024","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Alat Tulis Kantor","pagu":3077247.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0006","sub_unit":"UPT DKPB Wilayah Utara","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00025","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor- Kertas dan Cover","pagu":4432000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0006","sub_unit":"UPT DKPB Wilayah Utara","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00026","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor- Bahan Cetak","pagu":6021000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0006","sub_unit":"UPT DKPB Wilayah Utara","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00029","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Bahan Komputer","pagu":2490000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0006","sub_unit":"UPT DKPB Wilayah Utara","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00030","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Perabot Kantor","pagu":13095550.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0006","sub_unit":"UPT DKPB Wilayah Utara","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00031","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Alat Listrik","pagu":5371835.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0006","sub_unit":"UPT DKPB Wilayah Utara","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00036","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Alat/Bahan untuk Kegiatan Kantor Lainnya","pagu":6991108.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0006","sub_unit":"UPT DKPB Wilayah Utara","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00058","uraian":"Belanja Makanan dan Minuman Aktivitas Lapangan","pagu":225501000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0006","sub_unit":"UPT DKPB Wilayah Utara","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.02.001.00061","uraian":"Belanja Tagihan Listrik","pagu":7520000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0007","sub_unit":"UPT DKPB Wilayah Barat","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00009","uraian":"Belanja Bahan-Isi Tabung Pemadam Kebakaran","pagu":5330000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0007","sub_unit":"UPT DKPB Wilayah Barat","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00010","uraian":"Belanja Bahan-Isi Tabung Gas","pagu":1374000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0007","sub_unit":"UPT DKPB Wilayah Barat","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00024","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Alat Tulis Kantor","pagu":3707615.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0007","sub_unit":"UPT DKPB Wilayah Barat","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00025","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor- Kertas dan Cover","pagu":3663200.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0007","sub_unit":"UPT DKPB Wilayah Barat","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00026","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor- Bahan Cetak","pagu":5305760.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0007","sub_unit":"UPT DKPB Wilayah Barat","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00029","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Bahan Komputer","pagu":2620000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0007","sub_unit":"UPT DKPB Wilayah Barat","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00030","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Perabot Kantor","pagu":10267301.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0007","sub_unit":"UPT DKPB Wilayah Barat","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00031","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Alat Listrik","pagu":6695204.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0007","sub_unit":"UPT DKPB Wilayah Barat","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00036","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Alat/Bahan untuk Kegiatan Kantor Lainnya","pagu":3076770.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0007","sub_unit":"UPT DKPB Wilayah Barat","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00058","uraian":"Belanja Makanan dan Minuman Aktivitas Lapangan","pagu":238257000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0007","sub_unit":"UPT DKPB Wilayah Barat","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.02.001.00061","uraian":"Belanja Tagihan Listrik","pagu":9600000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0007","sub_unit":"UPT DKPB Wilayah Barat","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.03.002.00120","uraian":"Belanja Pemeliharaan Alat Kantor dan Rumah Tangga-Alat Rumah Tangga-Alat Pembersih","pagu":2539150.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0008","sub_unit":"UPT DKPB Wilayah Timur","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00009","uraian":"Belanja Bahan-Isi Tabung Pemadam Kebakaran","pagu":17412000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0008","sub_unit":"UPT DKPB Wilayah Timur","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00010","uraian":"Belanja Bahan-Isi Tabung Gas","pagu":2748000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0008","sub_unit":"UPT DKPB Wilayah Timur","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00024","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Alat Tulis Kantor","pagu":4544094.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0008","sub_unit":"UPT DKPB Wilayah Timur","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00025","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor- Kertas dan Cover","pagu":4326600.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0008","sub_unit":"UPT DKPB Wilayah Timur","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00026","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor- Bahan Cetak","pagu":5053040.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0008","sub_unit":"UPT DKPB Wilayah Timur","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00029","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Bahan Komputer","pagu":1790000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0008","sub_unit":"UPT DKPB Wilayah Timur","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00030","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Perabot Kantor","pagu":13182410.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0008","sub_unit":"UPT DKPB Wilayah Timur","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00031","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Alat Listrik","pagu":6938745.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0008","sub_unit":"UPT DKPB Wilayah Timur","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00036","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Alat/Bahan untuk Kegiatan Kantor Lainnya","pagu":1696770.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0008","sub_unit":"UPT DKPB Wilayah Timur","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00058","uraian":"Belanja Makanan dan Minuman Aktivitas Lapangan","pagu":226191000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0008","sub_unit":"UPT DKPB Wilayah Timur","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.02.001.00061","uraian":"Belanja Tagihan Listrik","pagu":13440000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0008","sub_unit":"UPT DKPB Wilayah Timur","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.03.002.00120","uraian":"Belanja Pemeliharaan Alat Kantor dan Rumah Tangga-Alat Rumah Tangga-Alat Pembersih","pagu":2848523.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0009","sub_unit":"UPT DKPB Wilayah Selatan","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00009","uraian":"Belanja Bahan-Isi Tabung Pemadam Kebakaran","pagu":2270000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0009","sub_unit":"UPT DKPB Wilayah Selatan","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00010","uraian":"Belanja Bahan-Isi Tabung Gas","pagu":2748000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0009","sub_unit":"UPT DKPB Wilayah Selatan","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00024","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Alat Tulis Kantor","pagu":3110460.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0009","sub_unit":"UPT DKPB Wilayah Selatan","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00025","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor- Kertas dan Cover","pagu":3489000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0009","sub_unit":"UPT DKPB Wilayah Selatan","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00026","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor- Bahan Cetak","pagu":1356800.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0009","sub_unit":"UPT DKPB Wilayah Selatan","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00029","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Bahan Komputer","pagu":2490000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0009","sub_unit":"UPT DKPB Wilayah Selatan","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00030","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Perabot Kantor","pagu":6733325.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0009","sub_unit":"UPT DKPB Wilayah Selatan","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00031","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Alat Listrik","pagu":4308260.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0009","sub_unit":"UPT DKPB Wilayah Selatan","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00036","uraian":"Belanja Alat/Bahan untuk Kegiatan Kantor-Alat/Bahan untuk Kegiatan Kantor Lainnya","pagu":3816869.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0009","sub_unit":"UPT DKPB Wilayah Selatan","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.01.001.00058","uraian":"Belanja Makanan dan Minuman Aktivitas Lapangan","pagu":195008000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0009","sub_unit":"UPT DKPB Wilayah Selatan","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.02.001.00061","uraian":"Belanja Tagihan Listrik","pagu":34008000.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}},{"sub_unit_code":"1.05.0.00.0.00.02.0009","sub_unit":"UPT DKPB Wilayah Selatan","sub_kegiatan_code":"1.05.04.2.01.0002","sub_kegiatan":"Pemadaman dan Pengendalian Kebakaran dalam Daerah Kabupaten/Kota","kode_rekening":"5.1.02.03.002.00120","uraian":"Belanja Pemeliharaan Alat Kantor dan Rumah Tangga-Alat Rumah Tangga-Alat Pembersih","pagu":1273614.0,"total_rak":0.0,"monthly":{"jan":0.0,"feb":0.0,"mar":0.0,"apr":0.0,"mei":0.0,"jun":0.0,"jul":0.0,"agu":0.0,"sep":0.0,"okt":0.0,"nov":0.0,"des":0.0}}];
+</script>
+<script>
+/* ===================== AKURAT-RAK prototype logic ===================== */
+
+const MONTHS = ['jan','feb','mar','apr','mei','jun','jul','agu','sep','okt','nov','des'];
+const MONTH_LABELS = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+
+/* ---------- helpers ---------- */
+function rp(n){
+  const v = Math.round(n || 0);
+  return 'Rp ' + v.toLocaleString('id-ID');
+}
+function pct(n){
+  if (n === null || n === undefined || !isFinite(n)) return '—';
+  return n.toFixed(1).replace('.', ',') + '%';
+}
+function hashStr(s){
+  let h = 0;
+  for (let i = 0; i < s.length; i++){
+    h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  }
+  return h;
+}
+function uniqBy(arr, keyFn){
+  const seen = new Set();
+  const out = [];
+  arr.forEach(item => {
+    const k = keyFn(item);
+    if (k && !seen.has(k)){ seen.add(k); out.push(item); }
+  });
+  return out;
+}
+function el(tag, attrs, children){
+  const e = document.createElement(tag);
+  if (attrs) Object.keys(attrs).forEach(k => {
+    if (k === 'class') e.className = attrs[k];
+    else if (k === 'html') e.innerHTML = attrs[k];
+    else e.setAttribute(k, attrs[k]);
+  });
+  (children || []).forEach(c => { if (c) e.appendChild(c); });
+  return e;
+}
+function textNode(tag, cls, text){
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  e.textContent = text;
+  return e;
+}
+
+RAK_LEAF_ITEMS.forEach(item => {
+  item.id = item.kode_rekening + '::' + item.sub_kegiatan_code;
+});
+
+/* ---------- Realisasi map: dibangun dari transaksi yang diinput Subbag Keuangan ---------- */
+function realisasiKey(subKegiatanCode, kodeRekening){
+  return subKegiatanCode + '::' + kodeRekening;
+}
+function buildRealisasiMap(entries){
+  const map = {};
+  entries.forEach(e => {
+    const key = realisasiKey(e.subKegiatanCode, e.kodeRekening);
+    if (!map[key]) map[key] = Object.fromEntries(MONTHS.map(m=>[m,0]));
+    const d = new Date(e.tanggal);
+    if (isNaN(d.getTime())) return;
+    const m = MONTHS[d.getMonth()];
+    map[key][m] += (Number(e.jumlah) || 0);
+  });
+  return map;
+}
+function realisasiForItem(item, map){
+  const key = realisasiKey(item.sub_kegiatan_code, item.kode_rekening);
+  return map[key] || Object.fromEntries(MONTHS.map(m=>[m,0]));
+}
+
+/* ---------- shared backend: Supabase ---------- */
+const SUPABASE_URL = "https://gesldjpktlyoxzuvixui.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_EZuvaczdyaWHpOwAfhTJdQ_fAFUpzAv";
+
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY
+);
+
+function isApiConfigured(){
+  return !!SUPABASE_URL && !!SUPABASE_PUBLISHABLE_KEY;
+}
+
+async function getCurrentProfile(){
+  const { data: authData, error: authError } = await supabaseClient.auth.getUser();
+  if (authError || !authData?.user) return null;
+
+  const { data: profile, error } = await supabaseClient
+    .from('pptk')
+    .select(`
+      id,
+      nama,
+      email,
+      username,
+      unit_kerja_id,
+      auth_user_id,
+      aktif,
+      role,
+      unit_kerja:unit_kerja_id (
+        id,
+        kode,
+        nama
+      )
+    `)
+    .eq('auth_user_id', authData.user.id)
+    .eq('aktif', true)
+    .maybeSingle();
+
+  if (error) {
+    console.error('Profile query failed:', error);
+    return null;
+  }
+
+  return profile ? { ...profile, authUser: authData.user } : null;
+}
+
+function profileToUser(profile){
+  if (!profile) return null;
+  return {
+    id: profile.id,
+    nama: profile.nama,
+    email: profile.email || profile.authUser?.email || '',
+    username: profile.username || '',
+    role: profile.role || 'pptk',
+    unitKerjaId: profile.unit_kerja_id,
+    unitKode: profile.unit_kerja?.kode || '',
+    unitNama: profile.unit_kerja?.nama || ''
+  };
+}
+
+async function apiLogin(username, password){
+  try{
+    const loginEmail = `${String(username).trim().toLowerCase()}@akurat-rak.local`;
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
+      email: loginEmail,
+      password
+    });
+
+    if (error) return { ok:false, error:error.message };
+
+    const profile = await getCurrentProfile();
+    if (!profile){
+      await supabaseClient.auth.signOut();
+      return { ok:false, error:'Akun belum terhubung ke data PPTK.' };
+    }
+
+    const user = profileToUser(profile);
+    return {
+      ok:true,
+      token:data.session?.access_token || '',
+      user,
+      submissions: await fetchSubmissions(),
+      realisasi: await fetchRealisasi()
+    };
+  } catch(err){
+    console.error('apiLogin failed', err);
+    return { ok:false, error:'Tidak bisa menghubungi Supabase.' };
+  }
+}
+
+async function apiLogout(){
+  try{
+    await supabaseClient.auth.signOut();
+  } catch(err){
+    console.error('apiLogout failed', err);
+  }
+}
+
+async function fetchSubmissions(){
+  const { data: rakRows, error: rakError } = await supabaseClient
+    .from('rak')
+    .select(`
+      id,
+      unit_kerja_id,
+      pptk_id,
+      unit_kerja:unit_kerja_id ( id, kode, nama ),
+      pptk:pptk_id ( id, nama, email ),
+      sub_kegiatan_code,
+      sub_kegiatan,
+      kode_rekening,
+      uraian_rekening,
+      pagu,
+      januari,
+      februari,
+      maret,
+      april,
+      mei,
+      juni,
+      juli,
+      agustus,
+      september,
+      oktober,
+      november,
+      desember,
+      created_at
+    `)
+    .order('created_at', { ascending:false });
+
+  if (rakError) {
+    console.error('fetchSubmissions RAK failed:', rakError);
+    return [];
+  }
+
+  // Ambil seluruh verifikasi secara terpisah lalu pilih status TERBARU
+  // untuk setiap RAK. Ini mencegah status lama mengambil alih status baru
+  // saat halaman melakukan polling/sinkronisasi ulang.
+  const rakIds = (rakRows || []).map(r => r.id);
+  let verificationMap = {};
+  if (rakIds.length) {
+    const { data: verRows, error: verError } = await supabaseClient
+      .from('verifikasi')
+      .select('id,rak_id,status,catatan,diverifikasi_oleh,diverifikasi_at,created_at')
+      .in('rak_id', rakIds)
+      .order('created_at', { ascending:false });
+
+    if (verError) {
+      console.error('fetchSubmissions verifikasi failed:', verError);
+    } else {
+      for (const v of (verRows || [])) {
+        // Karena sudah diurutkan terbaru -> terlama, hanya simpan baris pertama.
+        if (!verificationMap[v.rak_id]) verificationMap[v.rak_id] = v;
+      }
+    }
+  }
+
+  return (rakRows || []).map(r => {
+    const v = verificationMap[r.id];
+    const monthly = {
+      jan:Number(r.januari)||0,
+      feb:Number(r.februari)||0,
+      mar:Number(r.maret)||0,
+      apr:Number(r.april)||0,
+      mei:Number(r.mei)||0,
+      jun:Number(r.juni)||0,
+      jul:Number(r.juli)||0,
+      agu:Number(r.agustus)||0,
+      sep:Number(r.september)||0,
+      okt:Number(r.oktober)||0,
+      nov:Number(r.november)||0,
+      des:Number(r.desember)||0
+    };
+    return {
+      id:r.id,
+      subUnitCode:r.unit_kerja?.kode || '',
+      subUnit:r.unit_kerja?.nama || '',
+      subKegiatanCode:r.sub_kegiatan_code,
+      subKegiatan:r.sub_kegiatan,
+      belanjaKode:r.kode_rekening,
+      belanjaUraian:r.uraian_rekening || '',
+      uraian:r.uraian_rekening || '',
+      monthly,
+      total:Object.values(monthly).reduce((a,b)=>a+b,0),
+      status:v?.status === 'sesuai' ? 'diverifikasi' :
+             v?.status === 'perlu_perbaikan' ? 'ditolak' : 'menunggu',
+      catatan:v?.catatan || '',
+      diverifikasiOleh:v?.diverifikasi_oleh || '',
+      diverifikasiAt:v?.diverifikasi_at || '',
+      createdBy:r.pptk?.nama || 'Supabase'
+    };
+  });
+}
+async function fetchRealisasi(){
+  const { data, error } = await supabaseClient
+    .from('realisasi')
+    .select(`
+      id,
+      unit_kerja_id,
+      pptk_id,
+      unit_kerja:unit_kerja_id ( id, kode, nama ),
+      pptk:pptk_id ( id, nama, email ),
+      sub_kegiatan_code,
+      sub_kegiatan,
+      kode_rekening,
+      uraian_rekening,
+      tanggal,
+      no_bukti,
+      uraian_transaksi,
+      jumlah,
+      jenis_transaksi,
+      created_at
+    `)
+    .order('tanggal', { ascending:true });
+
+  if (error) {
+    console.error('fetchRealisasi failed:', error);
+    return [];
+  }
+
+  return (data || []).map(r => ({
+    id:r.id,
+    subUnitCode:r.unit_kerja?.kode || '',
+    subUnit:r.unit_kerja?.nama || '',
+    subKegiatanCode:r.sub_kegiatan_code,
+    subKegiatan:r.sub_kegiatan,
+    kodeRekening:r.kode_rekening,
+    uraianRekening:r.uraian_rekening || '',
+    tanggal:r.tanggal,
+    noBukti:r.no_bukti || '',
+    uraianTransaksi:r.uraian_transaksi || '',
+    jumlah:Number(r.jumlah)||0,
+    jenisTransaksi:r.jenis_transaksi || 'realisasi',
+    createdBy:r.pptk?.nama || 'Supabase'
+  }));
+}
+
+async function apiGetSession(){
+  const { data } = await supabaseClient.auth.getSession();
+  if (!data?.session) return { ok:false, error:'SESSION_INVALID' };
+
+  const profile = await getCurrentProfile();
+  if (!profile) return { ok:false, error:'PROFILE_INVALID' };
+
+  return {
+    ok:true,
+    user:profileToUser(profile),
+    submissions:await fetchSubmissions(),
+    realisasi:await fetchRealisasi()
+  };
+}
+
+async function getUnitIdByCode(code){
+  const { data, error } = await supabaseClient
+    .from('unit_kerja')
+    .select('id')
+    .eq('kode', code)
+    .single();
+
+  if (error) {
+    console.error('Unit lookup failed:', error);
+    return null;
+  }
+  return data?.id || null;
+}
+
+async function apiCreateSubmission(payload){
+  const profile = await getCurrentProfile();
+  if (!profile) return { ok:false, error:'PROFILE_INVALID' };
+
+  const selectedMaster = RAK_LEAF_ITEMS.find(i =>
+    i.sub_unit_code === payload.subUnitCode &&
+    i.sub_kegiatan_code === payload.subKegiatanCode &&
+    i.kode_rekening === payload.belanjaKode
+  );
+  if (!selectedMaster) return { ok:false, error:'RAK_MASTER_NOT_FOUND' };
+
+  const UNIT_CODE_MAP = {
+    '1.05.0.00.0.00.02.0001':'SEK',
+    '1.05.0.00.0.00.02.0002':'PENCEGAHAN',
+    '1.05.0.00.0.00.02.0003':'PEMADAMAN',
+    '1.05.0.00.0.00.02.0004':'PENYELAMATAN',
+    '1.05.0.00.0.00.02.0005':'SARPRAS-DATIN',
+    '1.05.0.00.0.00.02.0006':'UPT-UTARA',
+    '1.05.0.00.0.00.02.0007':'UPT-BARAT',
+    '1.05.0.00.0.00.02.0008':'UPT-TIMUR',
+    '1.05.0.00.0.00.02.0009':'UPT-SELATAN'
+  };
+  const unitCode = UNIT_CODE_MAP[selectedMaster.sub_unit_code];
+  if (!unitCode) return { ok:false, error:'UNIT_MASTER_NOT_FOUND' };
+  const unitId = await getUnitIdByCode(unitCode);
+  if (!unitId) return { ok:false, error:'UNIT_PROFILE_NOT_FOUND' };
+
+  // PPTK hanya boleh input pada unitnya sendiri. Keuangan/Admin boleh seluruh unit.
+  if (profile.role === 'pptk' && unitId !== profile.unit_kerja_id){
+    return { ok:false, error:'UNIT_ACCESS_DENIED' };
+  }
+
+  const monthly = payload.monthly || {};
+  const { data: rak, error } = await supabaseClient
+    .from('rak')
+    .insert({
+      unit_kerja_id:unitId,
+      pptk_id:profile.id,
+      sub_kegiatan_code:payload.subKegiatanCode,
+      sub_kegiatan:payload.subKegiatan,
+      kode_rekening:payload.belanjaKode,
+      uraian_rekening:payload.belanjaUraian || payload.uraian,
+      pagu:Number(selectedMaster.pagu)||0,
+      januari:Number(monthly.jan)||0,
+      februari:Number(monthly.feb)||0,
+      maret:Number(monthly.mar)||0,
+      april:Number(monthly.apr)||0,
+      mei:Number(monthly.mei)||0,
+      juni:Number(monthly.jun)||0,
+      juli:Number(monthly.jul)||0,
+      agustus:Number(monthly.agu)||0,
+      september:Number(monthly.sep)||0,
+      oktober:Number(monthly.okt)||0,
+      november:Number(monthly.nov)||0,
+      desember:Number(monthly.des)||0
+    })
+    .select('id')
+    .single();
+
+  if (error) {
+    console.error('apiCreateSubmission RAK insert failed:', error);
+    return { ok:false, error:error.message };
+  }
+
+  // Setiap RAK baru dibuat dengan status awal belum diverifikasi.
+  const { error: verifyError } = await supabaseClient
+    .from('verifikasi')
+    .insert({
+      rak_id:rak.id,
+      status:'belum_diverifikasi'
+    });
+
+  if (verifyError) {
+    // Jangan menganggap pengajuan gagal total bila RAK sudah berhasil masuk.
+    // Status verifikasi bisa dibuat oleh proses verifikasi bila policy insert
+    // verifikasi belum tersedia.
+    console.error('verifikasi insert failed:', verifyError);
+    return { ok:true, id:rak.id, warning:verifyError.message };
+  }
+
+  return { ok:true, id:rak.id };
+}
+
+async function apiUpdateStatus(id, status, catatan){
+  const mappedStatus =
+    status === 'diverifikasi' ? 'sesuai' :
+    status === 'ditolak' ? 'perlu_perbaikan' :
+    'belum_diverifikasi';
+
+  const { error } = await supabaseClient
+    .from('verifikasi')
+    .update({
+      status:mappedStatus,
+      catatan:catatan || '',
+      diverifikasi_oleh:state.auth.nama || state.auth.username || '',
+      diverifikasi_at:new Date().toISOString()
+    })
+    .eq('rak_id', id);
+
+  if (error) {
+    console.error('apiUpdateStatus failed:', error);
+    return { ok:false, error:error.message };
+  }
+
+  return { ok:true };
+}
+
+async function apiAddRealisasi(payload){
+  const profile = await getCurrentProfile();
+  if (!profile) return { ok:false, error:'PROFILE_INVALID' };
+
+  const selectedMaster = RAK_LEAF_ITEMS.find(i => i.sub_unit_code === payload.subUnitCode);
+  if (!selectedMaster) return { ok:false, error:'SUBUNIT_MASTER_NOT_FOUND' };
+
+  const UNIT_CODE_MAP = {
+    '1.05.0.00.0.00.02.0001':'SEK',
+    '1.05.0.00.0.00.02.0002':'PENCEGAHAN',
+    '1.05.0.00.0.00.02.0003':'PEMADAMAN',
+    '1.05.0.00.0.00.02.0004':'PENYELAMATAN',
+    '1.05.0.00.0.00.02.0005':'SARPRAS-DATIN',
+    '1.05.0.00.0.00.02.0006':'UPT-UTARA',
+    '1.05.0.00.0.00.02.0007':'UPT-BARAT',
+    '1.05.0.00.0.00.02.0008':'UPT-TIMUR',
+    '1.05.0.00.0.00.02.0009':'UPT-SELATAN'
+  };
+  const unitCode = UNIT_CODE_MAP[selectedMaster.sub_unit_code];
+  if (!unitCode) return { ok:false, error:'UNIT_MASTER_NOT_FOUND' };
+  const unitId = await getUnitIdByCode(unitCode);
+  if (!unitId) return { ok:false, error:'UNIT_PROFILE_INVALID' };
+
+  if (profile.role === 'pptk' && unitId !== profile.unit_kerja_id) {
+    return { ok:false, error:'UNIT_NOT_ALLOWED' };
+  }
+
+  const { data, error } = await supabaseClient
+    .from('realisasi')
+    .insert({
+      unit_kerja_id:unitId,
+      pptk_id:profile.id,
+      sub_kegiatan_code:payload.subKegiatanCode,
+      sub_kegiatan:payload.subKegiatan,
+      kode_rekening:payload.kodeRekening,
+      uraian_rekening:payload.uraianRekening || '',
+      tanggal:payload.tanggal,
+      no_bukti:payload.noBukti || '',
+      uraian_transaksi:payload.uraianTransaksi || '',
+      jumlah:Number(payload.jumlah)||0,
+      jenis_transaksi:payload.jenisTransaksi || 'realisasi'
+    })
+    .select('id')
+    .single();
+
+  if (error) {
+    console.error('apiAddRealisasi failed:', error);
+    return { ok:false, error:error.message };
+  }
+
+  return { ok:true, id:data.id };
+}
+
+async function apiDeleteRealisasi(id){
+  const { error } = await supabaseClient
+    .from('realisasi')
+    .delete()
+    .eq('id', id);
+
+  return error ? { ok:false, error:error.message } : { ok:true };
+}
+
+/* ---------- app state ---------- */
+const state = {
+  page: 'dashboard',
+  filters: { subUnit: '', subKegiatan: '', belanja: '' },
+  input: { subUnit: '', subKegiatan: '', belanja: '', uraian: '', monthly: {} },
+  realInput: { subUnit: '', subKegiatan: '', belanja: '', tanggal: '', noBukti: '', uraian: '', jumlah: '' },
+  submissions: [],
+  realisasi: [],
+  realCounter: 1,
+  expandedVerify: null,
+  subCounter: 1,
+  connected: false,   // true once successfully talking to the shared backend
+  syncing: false,
+  auth: { token: null, username: null, role: null, nama: null }, // set after login
+};
+MONTHS.forEach(m => state.input.monthly[m] = '');
+
+function isLoggedIn(){ return !!state.auth.token; }
+
+function makeSubmission(d){
+  const total = MONTHS.reduce((a,m)=>a+(d.monthly[m]||0),0);
+  return {
+    id: 'PJ-' + String(state.subCounter++).padStart(3,'0'),
+    subUnitCode: d.subUnitCode, subUnit: d.subUnit,
+    subKegiatanCode: d.subKegiatanCode, subKegiatan: d.subKegiatan,
+    belanjaKode: d.belanjaKode, belanjaUraian: d.belanjaUraian,
+    uraian: d.uraian,
+    monthly: d.monthly,
+    total: total,
+    status: 'menunggu', // menunggu | diverifikasi | ditolak
+    catatan: '',
+    createdBy: d.createdBy || 'Pratinjau Lokal',
+  };
+}
+
+/* ================= NAVIGATION ================= */
+document.querySelectorAll('.nav-item[data-page]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    state.page = btn.getAttribute('data-page');
+    document.querySelectorAll('.nav-item[data-page]').forEach(b => b.classList.toggle('active', b === btn));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + state.page).classList.add('active');
+    renderAll();
+    window.scrollTo({top:0});
+    btn.scrollIntoView({inline:'center', block:'nearest'});
+  });
+});
+
+/* ================= DASHBOARD ================= */
+function getApprovedAsLeafItems(){
+  return state.submissions.filter(s=>s.status==='diverifikasi').map(s => ({
+    sub_unit_code: s.subUnitCode, sub_unit: s.subUnit,
+    sub_kegiatan_code: s.subKegiatanCode, sub_kegiatan: s.subKegiatan,
+    kode_rekening: s.belanjaKode, uraian: s.belanjaUraian || s.uraian,
+    pagu: 0, // pengajuan PPTK menambah RAK, bukan menambah Pagu resmi
+    total_rak: s.total,
+    monthly: s.monthly,
+    id: 'approved-' + s.id,
+  }));
+}
+function getAllItems(){
+  return RAK_LEAF_ITEMS.concat(getApprovedAsLeafItems());
+}
+function getFilteredItems(f){
+  return getAllItems().filter(i =>
+    (!f.subUnit || i.sub_unit_code === f.subUnit) &&
+    (!f.subKegiatan || i.sub_kegiatan_code === f.subKegiatan) &&
+    (!f.belanja || i.kode_rekening === f.belanja)
+  );
+}
+function aggregateMonthly(items){
+  const realMap = buildRealisasiMap(state.realisasi);
+  return MONTHS.map(m => {
+    const rak = items.reduce((a,i)=>a+(i.monthly[m]||0),0);
+    const real = items.reduce((a,i)=>a+(realisasiForItem(i, realMap)[m]||0),0);
+    return { rak, real, dev: rak - real, pct: rak > 0 ? (real/rak*100) : (real>0?null:0) };
+  });
+}
+function totalPagu(items){
+  return items.reduce((a,i)=>a+(i.pagu||0),0);
+}
+
+function populateDashboardFilters(){
+  const subUnitSel = document.getElementById('f-subunit');
+  const subKegSel = document.getElementById('f-subkegiatan');
+  const belanjaSel = document.getElementById('f-belanja');
+
+  const allItems = getAllItems();
+  const subUnits = uniqBy(allItems, i=>i.sub_unit_code).map(i=>({code:i.sub_unit_code,name:i.sub_unit}));
+  subUnitSel.innerHTML = '<option value="">Semua Sub Unit</option>' +
+    subUnits.map(u=>`<option value="${u.code}">${u.code} — ${u.name}</option>`).join('');
+  subUnitSel.value = state.filters.subUnit;
+
+  const skPool = state.filters.subUnit ? allItems.filter(i=>i.sub_unit_code===state.filters.subUnit) : allItems;
+  const subKegs = uniqBy(skPool, i=>i.sub_kegiatan_code).map(i=>({code:i.sub_kegiatan_code,name:i.sub_kegiatan}));
+  subKegSel.innerHTML = '<option value="">Semua Sub Kegiatan</option>' +
+    subKegs.map(s=>`<option value="${s.code}">${s.code} — ${s.name}</option>`).join('');
+  subKegSel.value = state.filters.subKegiatan;
+
+  const bPool = skPool.filter(i => !state.filters.subKegiatan || i.sub_kegiatan_code === state.filters.subKegiatan);
+  const belanjas = uniqBy(bPool, i=>i.kode_rekening).map(i=>({code:i.kode_rekening,name:i.uraian}));
+  belanjaSel.innerHTML = '<option value="">Semua Belanja</option>' +
+    belanjas.map(b=>`<option value="${b.code}">${b.code} — ${b.name}</option>`).join('');
+  belanjaSel.value = state.filters.belanja;
+}
+
+document.getElementById('f-subunit').addEventListener('change', e=>{
+  state.filters.subUnit = e.target.value;
+  state.filters.subKegiatan = '';
+  state.filters.belanja = '';
+  renderDashboard();
+});
+document.getElementById('f-subkegiatan').addEventListener('change', e=>{
+  state.filters.subKegiatan = e.target.value;
+  state.filters.belanja = '';
+  renderDashboard();
+});
+document.getElementById('f-belanja').addEventListener('change', e=>{
+  state.filters.belanja = e.target.value;
+  renderDashboard();
+});
+document.getElementById('f-reset').addEventListener('click', ()=>{
+  state.filters = { subUnit:'', subKegiatan:'', belanja:'' };
+  renderDashboard();
+});
+
+function renderCards(monthly, items){
+  const totalRak = monthly.reduce((a,m)=>a+m.rak,0);
+  const totalReal = monthly.reduce((a,m)=>a+m.real,0);
+  const totalDev = totalRak - totalReal;
+  const overallPct = totalRak > 0 ? (totalReal/totalRak*100) : 0;
+  const pagu = totalPagu(items);
+  const overPagu = pagu > 0 && totalRak > pagu;
+
+  const cards = document.getElementById('dash-cards');
+  cards.innerHTML = '';
+  const items5 = [
+    { cls:'', label:'Total Pagu', value: rp(pagu), sub: items.length + ' rincian belanja' },
+    { cls: overPagu ? 'accent' : '', label:'Total RAK', value: rp(totalRak), sub: overPagu ? 'Melebihi Pagu sebesar ' + rp(totalRak - pagu) : 'Sesuai/di dalam Pagu' },
+    { cls:'good', label:'Total Realisasi', value: rp(totalReal), sub: 'Berdasarkan SP2D / Kartu Kendali Kegiatan' },
+    { cls:'', label:'Deviasi (RAK − Realisasi)', value: rp(totalDev), sub: 'Rencana yang belum terserap' },
+    { cls:'', label:'% Realisasi', value: pct(overallPct), sub: 'terhadap Total RAK' },
+  ];
+  items5.forEach(c=>{
+    cards.appendChild(el('div', {class:'stat-card ' + c.cls}, [
+      textNode('div','label',c.label),
+      textNode('div','value',c.value),
+      textNode('div','sub',c.sub),
+    ]));
+  });
+}
+
+var _chartData = null, _chartW = 0;
+function renderChart(monthly){
+  _chartData = monthly;
+  const holder = document.getElementById('chart-holder');
+  // Gambar chart sesuai lebar kontainer sebenarnya agar teks & batang tidak mengecil di HP
+  const W = Math.max(280, Math.round(holder.clientWidth || 0)) || 1080;
+  const compact = W < 520;
+  const H = compact ? 200 : 230, padL = 4, padB = 24, padT = 6;
+  _chartW = holder.clientWidth || 0;
+  const max = Math.max(1, ...monthly.map(m=>Math.max(m.rak, m.real)));
+  const slot = (W - padL) / 12;
+  const barW = slot * (compact ? 0.36 : 0.32);
+  const gap = slot * 0.06;
+  const fs = compact ? 9 : 10.5;
+
+  let bars = '';
+  monthly.forEach((m, i) => {
+    const x0 = padL + i*slot + (slot - (barW*2+gap))/2;
+    const hRak = (H - padT - padB) * (m.rak / max);
+    const hReal = (H - padT - padB) * (m.real / max);
+    const yRak = H - padB - hRak;
+    const yReal = H - padB - hReal;
+    bars += `<rect x="${x0}" y="${yRak}" width="${barW}" height="${hRak}" fill="var(--navy)" rx="1"><title>RAK ${MONTH_LABELS[i]}: ${rp(m.rak)}</title></rect>`;
+    bars += `<rect x="${x0+barW+gap}" y="${yReal}" width="${barW}" height="${hReal}" fill="var(--accent)" rx="1"><title>Realisasi ${MONTH_LABELS[i]}: ${rp(m.real)}</title></rect>`;
+    bars += `<text x="${x0 + barW + gap/2}" y="${H - 7}" font-size="${fs}" font-family="var(--mono)" fill="var(--muted-2)" text-anchor="middle">${MONTH_LABELS[i]}</text>`;
+  });
+  holder.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" style="width:100%;height:auto;display:block;" role="img" aria-label="Grafik RAK vs Realisasi per bulan">
+    <line x1="0" y1="${H-padB}" x2="${W}" y2="${H-padB}" stroke="var(--line)" stroke-width="1"/>
+    ${bars}
+  </svg>`;
+}
+// Gambar ulang saat lebar kontainer berubah (rotasi HP, resize jendela, pindah halaman)
+(function(){
+  const holder = document.getElementById('chart-holder');
+  if (!holder || !('ResizeObserver' in window)) return;
+  let raf = 0;
+  new ResizeObserver(() => {
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(() => {
+      const w = holder.clientWidth || 0;
+      if (_chartData && w && Math.abs(w - _chartW) > 1) renderChart(_chartData);
+    });
+  }).observe(holder);
+})();
+
+function cumulativeMonthly(monthly){
+  let cumRak = 0, cumReal = 0;
+  return monthly.map(m => {
+    cumRak += m.rak;
+    cumReal += m.real;
+    return {
+      rak: cumRak,
+      real: cumReal,
+      dev: cumRak - cumReal,
+      pct: cumRak > 0 ? (cumReal/cumRak*100) : (cumReal>0?null:0),
+    };
+  });
+}
+
+function renderDashTable(monthly){
+  const body = document.getElementById('dash-table-body');
+  body.innerHTML = '';
+  const cumulative = cumulativeMonthly(monthly);
+  cumulative.forEach((m,i)=>{
+    const tr = el('tr', {}, [
+      textNode('td','',MONTH_LABELS[i]),
+      textNode('td','num',rp(m.rak)),
+      textNode('td','num',rp(m.real)),
+      textNode('td','num ' + (m.dev>=0?'dev-pos':'dev-neg'), rp(m.dev)),
+      textNode('td','num',pct(m.pct)),
+    ]);
+    body.appendChild(tr);
+  });
+  // Desember kumulatif = total satu tahun, jadi baris TOTAL memakai nilai kumulatif terakhir
+  const last = cumulative[cumulative.length-1] || {rak:0,real:0,dev:0,pct:0};
+  body.appendChild(el('tr', {class:'total-row'}, [
+    textNode('td','','TOTAL'),
+    textNode('td','num',rp(last.rak)),
+    textNode('td','num',rp(last.real)),
+    textNode('td','num',rp(last.dev)),
+    textNode('td','num',pct(last.pct)),
+  ]));
+}
+
+function renderDashboard(){
+  populateDashboardFilters();
+  const items = getFilteredItems(state.filters);
+  const monthly = aggregateMonthly(items);
+  renderCards(monthly, items);
+  renderChart(monthly);
+  renderDashTable(monthly);
+}
+
+/* ================= INPUT (PPTK) ================= */
+function populateInputSelects(){
+  const subUnitSel = document.getElementById('in-subunit');
+  const subKegSel = document.getElementById('in-subkegiatan');
+  const belanjaSel = document.getElementById('in-belanja');
+
+  if (!subUnitSel.dataset.filled){
+    const subUnits = uniqBy(RAK_LEAF_ITEMS, i=>i.sub_unit_code).map(i=>({code:i.sub_unit_code,name:i.sub_unit}));
+    subUnitSel.innerHTML = '<option value="">Pilih Sub Unit…</option>' +
+      subUnits.map(u=>`<option value="${u.code}">${u.code} — ${u.name}</option>`).join('');
+    subUnitSel.dataset.filled = '1';
+  }
+  subUnitSel.value = state.input.subUnit;
+
+  if (state.input.subUnit){
+    const pool = RAK_LEAF_ITEMS.filter(i=>i.sub_unit_code===state.input.subUnit);
+    const subKegs = uniqBy(pool, i=>i.sub_kegiatan_code).map(i=>({code:i.sub_kegiatan_code,name:i.sub_kegiatan}));
+    subKegSel.disabled = false;
+    subKegSel.innerHTML = '<option value="">Pilih Sub Kegiatan…</option>' +
+      subKegs.map(s=>`<option value="${s.code}">${s.code} — ${s.name}</option>`).join('');
+    subKegSel.value = state.input.subKegiatan;
+  } else {
+    subKegSel.disabled = true;
+    subKegSel.innerHTML = '<option value="">Pilih Sub Unit terlebih dahulu</option>';
+  }
+
+  if (state.input.subKegiatan){
+    const pool = RAK_LEAF_ITEMS.filter(i=>i.sub_unit_code===state.input.subUnit && i.sub_kegiatan_code===state.input.subKegiatan);
+    const belanjas = uniqBy(pool, i=>i.kode_rekening).map(i=>({code:i.kode_rekening,name:i.uraian}));
+    belanjaSel.disabled = false;
+    belanjaSel.innerHTML = '<option value="">Pilih Belanja / Kode Rekening…</option>' +
+      belanjas.map(b=>`<option value="${b.code}">${b.code} — ${b.name}</option>`).join('') +
+      '';
+    belanjaSel.value = state.input.belanja;
+  } else {
+    belanjaSel.disabled = true;
+    belanjaSel.innerHTML = '<option value="">Pilih Sub Kegiatan terlebih dahulu</option>';
+  }
+}
+
+document.getElementById('in-subunit').addEventListener('change', e=>{
+  state.input.subUnit = e.target.value;
+  state.input.subKegiatan = '';
+  state.input.belanja = '';
+  populateInputSelects();
+});
+document.getElementById('in-subkegiatan').addEventListener('change', e=>{
+  state.input.subKegiatan = e.target.value;
+  state.input.belanja = '';
+  populateInputSelects();
+});
+document.getElementById('in-belanja').addEventListener('change', e=>{
+  state.input.belanja = e.target.value;
+});
+
+function renderInputMonths(){
+  const holder = document.getElementById('in-months');
+  holder.innerHTML = '';
+  MONTH_LABELS.forEach((label, idx)=>{
+    const m = MONTHS[idx];
+    const field = el('div',{class:'month-field'},[
+      textNode('label','',label),
+    ]);
+    const input = el('input',{type:'number', min:'0', step:'1000', placeholder:'0', id:'in-m-'+m});
+    input.value = state.input.monthly[m];
+    input.addEventListener('input', ()=>{
+      state.input.monthly[m] = input.value;
+      updateInputTotal();
+    });
+    field.appendChild(input);
+    holder.appendChild(field);
+  });
+}
+function updateInputTotal(){
+  const total = MONTHS.reduce((a,m)=>a + (parseFloat(state.input.monthly[m])||0), 0);
+  document.getElementById('in-total').textContent = rp(total);
+  return total;
+}
+
+document.getElementById('in-uraian').addEventListener('input', e=>{
+  state.input.uraian = e.target.value;
+});
+
+document.getElementById('in-clear').addEventListener('click', ()=>{
+  state.input = { subUnit:'', subKegiatan:'', belanja:'', uraian:'', monthly:{} };
+  MONTHS.forEach(m=>state.input.monthly[m]='');
+  document.getElementById('in-uraian').value = '';
+  populateInputSelects();
+  renderInputMonths();
+  updateInputTotal();
+});
+
+document.getElementById('in-submit').addEventListener('click', async ()=>{
+  const d = state.input;
+  if (!d.subUnit){ showToast('Pilih Sub Unit terlebih dahulu.'); return; }
+  if (!d.subKegiatan){ showToast('Pilih Sub Kegiatan terlebih dahulu.'); return; }
+  if (!d.belanja){ showToast('Pilih Belanja / Kode Rekening terlebih dahulu.'); return; }
+  if (!d.uraian || !d.uraian.trim()){ showToast('Isi uraian rencana kebutuhan belanja.'); return; }
+  const total = updateInputTotal();
+  if (total <= 0){ showToast('Isi rencana kebutuhan minimal untuk satu bulan.'); return; }
+
+  const subUnitObj = RAK_LEAF_ITEMS.find(i=>i.sub_unit_code===d.subUnit);
+  const subKegObj = RAK_LEAF_ITEMS.find(i=>i.sub_kegiatan_code===d.subKegiatan);
+  let belanjaKode = d.belanja, belanjaUraian = '';
+  if (d.belanja === '__baru__'){
+    belanjaKode = '5.1.xx.xx.xxx (baru)';
+    belanjaUraian = d.uraian;
+  } else {
+    const bObj = RAK_LEAF_ITEMS.find(i=>i.kode_rekening===d.belanja && i.sub_kegiatan_code===d.subKegiatan);
+    belanjaUraian = bObj ? bObj.uraian : '';
+  }
+
+  const monthlyClean = {};
+  MONTHS.forEach(m => monthlyClean[m] = parseFloat(d.monthly[m]) || 0);
+
+  const payload = {
+    subUnitCode: d.subUnit, subUnit: subUnitObj ? subUnitObj.sub_unit : '',
+    subKegiatanCode: d.subKegiatan, subKegiatan: subKegObj ? subKegObj.sub_kegiatan : '',
+    belanjaKode, belanjaUraian,
+    uraian: d.uraian,
+    monthly: monthlyClean,
+    total: total,
+  };
+
+  const submitBtn = document.getElementById('in-submit');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Mengirim…';
+
+  if (state.connected){
+    const result = await apiCreateSubmission(payload);
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Ajukan Rencana Kebutuhan';
+    if (!result || !result.ok){
+      if (result && result.error === 'SESSION_INVALID'){ forceLogout('Sesi berakhir, silakan login kembali.'); return; }
+      showToast('Gagal mengirim ke Supabase. Periksa koneksi lalu coba lagi.');
+      return;
+    }
+    showToast('Rencana kebutuhan diajukan. Menunggu verifikasi Subbag Keuangan.');
+    document.getElementById('in-clear').click();
+    await syncSubmissions();
+  } else {
+    const sub = makeSubmission(payload);
+    state.submissions.unshift(sub);
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Ajukan Rencana Kebutuhan';
+    showToast('Rencana kebutuhan diajukan (mode demo lokal — belum tersambung ke Supabase).');
+    document.getElementById('in-clear').click();
+    renderAll();
+  }
+});
+
+function renderInputHistory(){
+  const body = document.getElementById('in-history-body');
+  const empty = document.getElementById('in-history-empty');
+  body.innerHTML = '';
+  if (state.submissions.length === 0){
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  state.submissions.forEach(s=>{
+    body.appendChild(el('tr',{},[
+      textNode('td','',s.subUnit),
+      textNode('td','',s.subKegiatan),
+      textNode('td','',s.belanjaKode + ' — ' + s.belanjaUraian),
+      textNode('td','',s.createdBy || '—'),
+      textNode('td','num',rp(s.total)),
+      el('td',{},[statusBadge(s.status)]),
+    ]));
+  });
+}
+
+function statusBadge(status){
+  if (status === 'menunggu') return el('span',{class:'badge warn',html:'Menunggu Verifikasi'});
+  if (status === 'diverifikasi') return el('span',{class:'badge good',html:'Diverifikasi'});
+  return el('span',{class:'badge bad',html:'Ditolak'});
+}
+
+/* ================= INPUT REALISASI (Subbag Keuangan) ================= */
+function populateRealisasiSelects(){
+  const subUnitSel = document.getElementById('rl-subunit');
+  const subKegSel = document.getElementById('rl-subkegiatan');
+  const belanjaSel = document.getElementById('rl-belanja');
+  if (!subUnitSel) return;
+
+  const allItems = getAllItems();
+  if (!subUnitSel.dataset.filled){
+    const subUnits = uniqBy(allItems, i=>i.sub_unit_code).map(i=>({code:i.sub_unit_code,name:i.sub_unit}));
+    subUnitSel.innerHTML = '<option value="">Pilih Sub Unit…</option>' +
+      subUnits.map(u=>`<option value="${u.code}">${u.code} — ${u.name}</option>`).join('');
+    subUnitSel.dataset.filled = '1';
+  }
+  subUnitSel.value = state.realInput.subUnit;
+
+  if (state.realInput.subUnit){
+    const pool = allItems.filter(i=>i.sub_unit_code===state.realInput.subUnit);
+    const subKegs = uniqBy(pool, i=>i.sub_kegiatan_code).map(i=>({code:i.sub_kegiatan_code,name:i.sub_kegiatan}));
+    subKegSel.disabled = false;
+    subKegSel.innerHTML = '<option value="">Pilih Sub Kegiatan…</option>' +
+      subKegs.map(s=>`<option value="${s.code}">${s.code} — ${s.name}</option>`).join('');
+    subKegSel.value = state.realInput.subKegiatan;
+  } else {
+    subKegSel.disabled = true;
+    subKegSel.innerHTML = '<option value="">Pilih Sub Unit terlebih dahulu</option>';
+  }
+
+  if (state.realInput.subKegiatan){
+    const pool = allItems.filter(i=>i.sub_unit_code===state.realInput.subUnit && i.sub_kegiatan_code===state.realInput.subKegiatan);
+    const belanjas = uniqBy(pool, i=>i.kode_rekening).map(i=>({code:i.kode_rekening,name:i.uraian}));
+    belanjaSel.disabled = false;
+    belanjaSel.innerHTML = '<option value="">Pilih Belanja / Kode Rekening…</option>' +
+      belanjas.map(b=>`<option value="${b.code}">${b.code} — ${b.name}</option>`).join('');
+    belanjaSel.value = state.realInput.belanja;
+  } else {
+    belanjaSel.disabled = true;
+    belanjaSel.innerHTML = '<option value="">Pilih Sub Kegiatan terlebih dahulu</option>';
+  }
+}
+
+document.getElementById('rl-subunit') && document.getElementById('rl-subunit').addEventListener('change', e=>{
+  state.realInput.subUnit = e.target.value;
+  state.realInput.subKegiatan = '';
+  state.realInput.belanja = '';
+  populateRealisasiSelects();
+});
+document.getElementById('rl-subkegiatan') && document.getElementById('rl-subkegiatan').addEventListener('change', e=>{
+  state.realInput.subKegiatan = e.target.value;
+  state.realInput.belanja = '';
+  populateRealisasiSelects();
+});
+document.getElementById('rl-belanja') && document.getElementById('rl-belanja').addEventListener('change', e=>{
+  state.realInput.belanja = e.target.value;
+});
+['rl-tanggal','rl-nobukti','rl-uraian','rl-jumlah'].forEach(id=>{
+  const stateKey = { 'rl-tanggal':'tanggal', 'rl-nobukti':'noBukti', 'rl-uraian':'uraian', 'rl-jumlah':'jumlah' }[id];
+  const elm = document.getElementById(id);
+  if (elm) elm.addEventListener('input', e=>{ state.realInput[stateKey] = e.target.value; });
+});
+
+document.getElementById('rl-clear') && document.getElementById('rl-clear').addEventListener('click', ()=>{
+  state.realInput = { subUnit:'', subKegiatan:'', belanja:'', tanggal:'', noBukti:'', uraian:'', jumlah:'' };
+  ['rl-tanggal','rl-nobukti','rl-uraian','rl-jumlah'].forEach(id=>{ const e=document.getElementById(id); if (e) e.value=''; });
+  populateRealisasiSelects();
+});
+
+document.getElementById('rl-submit') && document.getElementById('rl-submit').addEventListener('click', async ()=>{
+  const d = state.realInput;
+  const jumlah = parseFloat(d.jumlah) || 0;
+  if (jumlah <= 0){ showToast('Isi jumlah realisasi.'); return; }
+
+  const allItems = getAllItems();
+  const subUnitObj = allItems.find(i=>i.sub_unit_code===d.subUnit);
+  const subKegObj = allItems.find(i=>i.sub_kegiatan_code===d.subKegiatan);
+  const belanjaObj = allItems.find(i=>i.kode_rekening===d.belanja && i.sub_kegiatan_code===d.subKegiatan);
+
+  const payload = {
+    subUnitCode: d.subUnit, subUnit: subUnitObj ? subUnitObj.sub_unit : '',
+    subKegiatanCode: d.subKegiatan, subKegiatan: subKegObj ? subKegObj.sub_kegiatan : '',
+    kodeRekening: d.belanja, uraianRekening: belanjaObj ? belanjaObj.uraian : '',
+    tanggal: d.tanggal, noBukti: d.noBukti, uraianTransaksi: d.uraian,
+    jumlah: jumlah,
+  };
+
+  const btn = document.getElementById('rl-submit');
+  btn.disabled = true; btn.textContent = 'Menyimpan…';
+
+  if (state.connected){
+    const result = await apiAddRealisasi(payload);
+    btn.disabled = false; btn.textContent = 'Simpan Realisasi';
+    if (!result || !result.ok){
+      if (result && result.error === 'SESSION_INVALID'){ forceLogout('Sesi berakhir, silakan login kembali.'); return; }
+      const msgMap = {
+        PROFILE_INVALID:'Profil PPTK belum terhubung dengan akun.',
+        SUBUNIT_MASTER_NOT_FOUND:'Sub Unit tidak ditemukan pada master.',
+        UNIT_NOT_ALLOWED:'Kamu hanya dapat menginput untuk unit yang terhubung ke akun ini.',
+        UNIT_PROFILE_INVALID:'Unit pada profil PPTK belum lengkap.'
+      };
+      showToast('Gagal menyimpan: ' + (msgMap[result?.error] || result?.error || 'periksa koneksi/RLS Supabase.'));
+      console.error('Input Realisasi gagal:', result);
+      return;
+    }
+    showToast('Realisasi tercatat.');
+    document.getElementById('rl-clear').click();
+    await syncSubmissions();
+  } else {
+    state.realisasi.unshift({
+      id: 'RL-' + String(state.realCounter++).padStart(3,'0'),
+      ...payload,
+      createdBy: 'Pratinjau Lokal',
+    });
+    btn.disabled = false; btn.textContent = 'Simpan Realisasi';
+    showToast('Realisasi tercatat (mode pratinjau lokal).');
+    document.getElementById('rl-clear').click();
+    renderAll();
+  }
+});
+
+function renderRealisasiHistory(){
+  const body = document.getElementById('rl-history-body');
+  const empty = document.getElementById('rl-history-empty');
+  if (!body) return;
+  body.innerHTML = '';
+  const sorted = [...state.realisasi].sort((a,b) => (b.tanggal||'').localeCompare(a.tanggal||''));
+  if (sorted.length === 0){
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  sorted.forEach(r=>{
+    const delBtn = el('button',{class:'btn danger-outline small'},[]);
+    delBtn.textContent = 'Hapus';
+    delBtn.addEventListener('click', async ()=>{
+      delBtn.disabled = true;
+      if (state.connected){
+        const result = await apiDeleteRealisasi(r.id);
+        if (!result || !result.ok){
+          if (result && result.error === 'SESSION_INVALID'){ forceLogout('Sesi berakhir, silakan login kembali.'); return; }
+          showToast('Gagal menghapus. Coba lagi.'); delBtn.disabled = false; return;
+        }
+        showToast('Realisasi dihapus.');
+        await syncSubmissions();
+      } else {
+        state.realisasi = state.realisasi.filter(x=>x.id!==r.id);
+        showToast('Realisasi dihapus (mode pratinjau lokal).');
+        renderAll();
+      }
+    });
+    body.appendChild(el('tr',{},[
+      textNode('td','',r.tanggal || '—'),
+      textNode('td','',r.subUnit),
+      textNode('td','',r.kodeRekening + ' — ' + r.uraianRekening),
+      textNode('td','',r.noBukti || '—'),
+      textNode('td','',r.uraianTransaksi || '—'),
+      textNode('td','num',rp(r.jumlah)),
+      el('td',{},[delBtn]),
+    ]));
+  });
+}
+
+/* ================= VERIFY (Subbag Keuangan) ================= */
+function renderVerify(){
+  const pendingBody = document.getElementById('verify-pending-body');
+  const doneBody = document.getElementById('verify-done-body');
+  const pendingEmpty = document.getElementById('verify-pending-empty');
+  const doneEmpty = document.getElementById('verify-done-empty');
+  pendingBody.innerHTML = '';
+  doneBody.innerHTML = '';
+
+  const pending = state.submissions.filter(s=>s.status==='menunggu');
+  const done = state.submissions.filter(s=>s.status!=='menunggu');
+
+  pendingEmpty.style.display = pending.length ? 'none' : 'block';
+  doneEmpty.style.display = done.length ? 'none' : 'block';
+
+  pending.forEach(s=>{
+    pendingBody.appendChild(buildVerifyRow(s, true));
+    if (state.expandedVerify === s.id) pendingBody.appendChild(buildDetailRow(s, 6));
+  });
+  done.forEach(s=>{
+    doneBody.appendChild(buildVerifyRow(s, false));
+    if (state.expandedVerify === s.id) doneBody.appendChild(buildDetailRow(s, 6));
+  });
+
+  document.getElementById('pending-badge').textContent = pending.length;
+  document.getElementById('pending-badge').style.display = pending.length ? 'inline-flex' : 'none';
+}
+
+function buildVerifyRow(s, showActions){
+  const toggle = el('button',{class:'btn secondary small', style:'padding:3px 8px;'},[]);
+  toggle.textContent = state.expandedVerify === s.id ? '−' : '+';
+  toggle.addEventListener('click', ()=>{
+    state.expandedVerify = state.expandedVerify === s.id ? null : s.id;
+    renderVerify();
+  });
+
+  const tds = [
+    el('td',{},[toggle]),
+    textNode('td','',s.subUnit),
+    textNode('td','',s.subKegiatan),
+    textNode('td','',s.uraian),
+    textNode('td','num',rp(s.total)),
+  ];
+
+  if (showActions){
+    const okBtn = el('button',{class:'btn accent small'},[]); okBtn.textContent='Verifikasi';
+    okBtn.addEventListener('click', ()=>{ okBtn.disabled = true; approveSubmission(s.id); });
+    const noBtn = el('button',{class:'btn danger-outline small'},[]); noBtn.textContent='Tolak';
+    noBtn.addEventListener('click', ()=>{
+      state.expandedVerify = s.id;
+      s._rejecting = true;
+      renderVerify();
+    });
+    tds.push(el('td',{},[
+      el('div',{style:'display:flex;gap:8px;'},[okBtn, noBtn])
+    ]));
+  } else {
+    tds.push(el('td',{},[statusBadge(s.status)]));
+  }
+
+  return el('tr',{class:'row-clickable'}, tds);
+}
+
+function buildDetailRow(s, colspan){
+  const monthsGrid = el('div',{class:'mini-months'},[]);
+  MONTH_LABELS.forEach((label, idx)=>{
+    const m = MONTHS[idx];
+    monthsGrid.appendChild(el('div',{class:'mm'},[
+      textNode('div','m',label),
+      textNode('div','v',rp(s.monthly[m])),
+    ]));
+  });
+
+  const detailGrid = el('div',{class:'detail-grid'},[
+    textNode('div','k','Belanja / Kode Rekening'),
+    textNode('div','k','Status'),
+    textNode('div','k','ID Pengajuan'),
+    textNode('div','v', s.belanjaKode + ' — ' + s.belanjaUraian),
+    el('div',{class:'v'},[statusBadge(s.status)]),
+    textNode('div','v', s.id),
+    textNode('div','k','Diajukan Oleh'),
+    textNode('div','v', s.createdBy || '—'),
+    textNode('div','',''),
+  ]);
+
+  const box = el('div',{class:'detail-box'},[detailGrid, monthsGrid]);
+
+  if (s.catatan){
+    box.appendChild(el('div',{class:'note'},[
+      el('b',{},[document.createTextNode('Catatan penolakan: ')]),
+      document.createTextNode(s.catatan)
+    ]));
+  }
+
+  if (s._rejecting){
+    const ta = el('textarea',{placeholder:'Tuliskan alasan penolakan…'},[]);
+    const saveBtn = el('button',{class:'btn danger-outline small'},[]); saveBtn.textContent = 'Simpan Penolakan';
+    saveBtn.addEventListener('click', ()=>{
+      if (!ta.value.trim()){ showToast('Isi alasan penolakan.'); return; }
+      rejectSubmission(s.id, ta.value.trim());
+    });
+    const cancelBtn = el('button',{class:'btn secondary small'},[]); cancelBtn.textContent='Batal';
+    cancelBtn.addEventListener('click', ()=>{ s._rejecting=false; renderVerify(); });
+    box.appendChild(el('div',{class:'reject-box'},[ta, saveBtn, cancelBtn]));
+  }
+
+  const td = el('td',{colspan:String(colspan)},[box]);
+  return el('tr',{class:'detail-row'},[td]);
+}
+
+async function approveSubmission(id){
+  const s = state.submissions.find(x=>x.id===id);
+  if (!s) return;
+
+  if (state.connected){
+    const result = await apiUpdateStatus(id, 'diverifikasi', '');
+    if (!result || !result.ok){
+      if (result && result.error === 'SESSION_INVALID'){ forceLogout('Sesi berakhir, silakan login kembali.'); return; }
+      showToast('Gagal menyimpan verifikasi ke Supabase. Coba lagi.'); renderVerify(); return;
+    }
+    // Pindahkan langsung dari daftar Menunggu Verifikasi ke Riwayat Proses.
+    s.status = 'diverifikasi';
+    s.catatan = '';
+    s._rejecting = false;
+    state.expandedVerify = null;
+    renderVerify();
+    showToast('Pengajuan ' + s.id + ' berhasil diverifikasi dan dipindahkan ke Riwayat Proses.');
+    // Sinkronkan ulang dari Supabase setelah tampilan diperbarui.
+    await syncSubmissions();
+  } else {
+    s.status = 'diverifikasi';
+    state.expandedVerify = null;
+    showToast('Pengajuan ' + s.id + ' diverifikasi (mode demo lokal).');
+    renderAll();
+  }
+}
+async function rejectSubmission(id, catatan){
+  const s = state.submissions.find(x=>x.id===id);
+  if (!s) return;
+
+  if (state.connected){
+    const result = await apiUpdateStatus(id, 'ditolak', catatan);
+    if (!result || !result.ok){
+      if (result && result.error === 'SESSION_INVALID'){ forceLogout('Sesi berakhir, silakan login kembali.'); return; }
+      showToast('Gagal menyimpan penolakan ke Supabase. Coba lagi.'); return;
+    }
+    s.status = 'ditolak';
+    s.catatan = catatan;
+    s._rejecting = false;
+    state.expandedVerify = null;
+    renderVerify();
+    showToast('Pengajuan ' + s.id + ' dipindahkan ke Riwayat Proses.');
+    await syncSubmissions();
+  } else {
+    s.status = 'ditolak';
+    s.catatan = catatan;
+    s._rejecting = false;
+    showToast('Pengajuan ' + s.id + ' ditolak (mode demo lokal).');
+    renderAll();
+  }
+}
+
+/* ================= TOAST ================= */
+let toastTimer = null;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 3200);
+}
+
+/* ================= RENDER ALL ================= */
+function renderAll(){
+  applyRoleVisibility();
+  renderDashboard();
+  populateInputSelects();
+  renderInputMonths();
+  updateInputTotal();
+  renderInputHistory();
+  renderVerify();
+  populateRealisasiSelects();
+  renderRealisasiHistory();
+  renderConnectionBanner();
+  renderUserBadge();
+}
+
+function applyRoleVisibility(){
+  const role = state.auth.role || '';
+  const inputNav = document.querySelector('.nav-item[data-page="input"]');
+  const verifyNav = document.querySelector('.nav-item[data-page="verify"]');
+  const realisasiNav = document.querySelector('.nav-item[data-page="realisasi"]');
+  if (inputNav) inputNav.style.display = '';
+  if (realisasiNav) realisasiNav.style.display = '';
+  if (verifyNav) verifyNav.style.display = (role === 'keuangan' || role === 'admin') ? '' : 'none';
+
+  const inputTitle = document.querySelector('#page-input h1');
+  if (inputTitle) inputTitle.textContent = role === 'pptk' ? 'Input Rencana Kebutuhan Belanja (PPTK)' : 'Input Rencana Kebutuhan Belanja';
+  const inputDesc = document.querySelector('#page-input .page-head p');
+  if (inputDesc) inputDesc.textContent = role === 'pptk'
+    ? 'Pilih Sub Unit, Sub Kegiatan, dan Belanja/Kode Rekening dari master. PPTK dapat menginput rencana untuk unit kerjanya.'
+    : 'Pilih Sub Unit, Sub Kegiatan, dan Belanja/Kode Rekening dari master. Subbag Keuangan dan Admin dapat menginput rencana untuk seluruh unit.';
+  const realTitle = document.querySelector('#page-realisasi h1');
+  if (realTitle) realTitle.textContent = role === 'pptk' ? 'Input Realisasi (PPTK)' : 'Input Realisasi (Subbag Keuangan)';
+  const realDesc = document.querySelector('#page-realisasi .page-head p');
+  if (realDesc) realDesc.textContent = role === 'pptk'
+    ? 'Catat realisasi per transaksi sesuai bukti pencairan. PPTK dapat menginput realisasi untuk unit kerjanya.'
+    : 'Catat realisasi per transaksi sesuai SP2D / bukti pencairan. Subbag Keuangan dan Admin dapat menginput realisasi untuk seluruh unit.';
+}
+
+function renderUserBadge(){
+  const box = document.getElementById('user-badge');
+  if (!box) return;
+  if (!isApiConfigured() || !isLoggedIn()){
+    box.style.display = 'none';
+    return;
+  }
+  box.style.display = 'block';
+  const roleLabel = { pptk:'PPTK', keuangan:'Subbag Keuangan', admin:'Administrator' }[state.auth.role] || state.auth.role;
+  box.innerHTML = '';
+  box.appendChild(el('div',{class:'user-name'},[document.createTextNode(state.auth.nama || state.auth.username)]));
+  box.appendChild(el('div',{class:'user-role'},[document.createTextNode(roleLabel)]));
+  const logoutBtn = el('button',{class:'btn secondary small',style:'margin-top:8px;width:100%;'},[]);
+  logoutBtn.textContent = 'Keluar';
+  logoutBtn.addEventListener('click', doLogout);
+  box.appendChild(logoutBtn);
+}
+
+function renderConnectionBanner(){
+  const el2 = document.getElementById('conn-banner');
+  if (!el2) return;
+  if (!isApiConfigured()){
+    el2.style.display = 'block';
+    el2.className = 'conn-banner warn';
+    el2.textContent = 'Mode koneksi Supabase belum aktif.';
+  } else if (!state.connected){
+    el2.style.display = 'block';
+    el2.className = 'conn-banner bad';
+    el2.textContent = 'Tidak bisa terhubung ke Supabase. Periksa koneksi internet, lalu muat ulang halaman.';
+  } else {
+    el2.style.display = 'none';
+  }
+}
+
+/* ---------- sync loop against the shared Supabase backend ---------- */
+function mapSubmissions(arr){
+  return (arr || []).map(s => ({
+    id: s.id, subUnitCode: s.subUnitCode, subUnit: s.subUnit,
+    subKegiatanCode: s.subKegiatanCode, subKegiatan: s.subKegiatan,
+    belanjaKode: s.belanjaKode, belanjaUraian: s.belanjaUraian,
+    uraian: s.uraian, monthly: s.monthly, total: Number(s.total) || 0,
+    status: s.status || 'menunggu', catatan: s.catatan || '',
+    createdBy: s.createdBy || '',
+  }));
+}
+function mapRealisasi(arr){
+  return (arr || []).map(r => ({
+    id: r.id, subUnitCode: r.subUnitCode, subUnit: r.subUnit,
+    subKegiatanCode: r.subKegiatanCode, subKegiatan: r.subKegiatan,
+    kodeRekening: r.kodeRekening, uraianRekening: r.uraianRekening,
+    tanggal: r.tanggal, noBukti: r.noBukti, uraianTransaksi: r.uraianTransaksi,
+    jumlah: Number(r.jumlah) || 0,
+    createdBy: r.createdBy || '',
+  }));
+}
+
+async function syncSubmissions(){
+  if (!isApiConfigured() || !isLoggedIn()) return;
+  state.syncing = true;
+  const data = await apiGetSession();
+  state.syncing = false;
+  if (!data || !data.ok){
+    state.connected = false;
+    renderConnectionBanner();
+    return;
+  }
+  state.connected = true;
+  const rejectingIds = new Set(state.submissions.filter(s=>s._rejecting).map(s=>s.id));
+  const remote = mapSubmissions(data.submissions);
+  remote.forEach(r => { if (rejectingIds.has(r.id)) r._rejecting = true; });
+  state.submissions = remote;
+  state.realisasi = mapRealisasi(data.realisasi);
+  renderAll();
+}
+
+let pollTimer = null;
+function startPolling(){
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(syncSubmissions, 6000);
+}
+function stopPolling(){
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = null;
+}
+
+/* ---------- login / logout ---------- */
+const SESSION_STORAGE_KEY = 'akuratRakSession';
+
+function showLoginScreen(message){
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app-shell').style.display = 'none';
+  const errBox = document.getElementById('login-error');
+  const successBox = document.getElementById('login-success');
+  const helpBox = document.getElementById('login-help');
+  if (message){ errBox.textContent = message; errBox.style.display = 'block'; }
+  else { errBox.style.display = 'none'; }
+  if (successBox) successBox.style.display = 'none';
+  if (helpBox) helpBox.style.display = 'none';
+}
+function showAppShell(){
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-shell').style.display = 'grid';
+}
+
+function forceLogout(message){
+  stopPolling();
+  sessionStorage.removeItem(SESSION_STORAGE_KEY);
+  state.auth = { token:null, username:null, role:null, nama:null };
+  state.submissions = [];
+  state.realisasi = [];
+  state.connected = false;
+  showLoginScreen(message);
+}
+
+async function doLogout(){
+  await apiLogout();
+  forceLogout(null);
+}
+
+// Tampilkan/sembunyikan password
+document.getElementById('password-toggle').addEventListener('click', ()=>{
+  const input = document.getElementById('login-password');
+  const open = document.getElementById('eye-open');
+  const closed = document.getElementById('eye-closed');
+  const showing = input.type === 'text';
+  input.type = showing ? 'password' : 'text';
+  open.style.display = showing ? 'block' : 'none';
+  closed.style.display = showing ? 'none' : 'block';
+  const btn = document.getElementById('password-toggle');
+  btn.setAttribute('aria-label', showing ? 'Tampilkan password' : 'Sembunyikan password');
+  btn.title = showing ? 'Tampilkan password' : 'Sembunyikan password';
+});
+
+document.getElementById('login-form').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const username = document.getElementById('login-username').value.trim();
+  const password = document.getElementById('login-password').value;
+  if (!username || !password){ showLoginScreen('Isi username dan password.'); return; }
+  const btn = document.getElementById('login-submit');
+  btn.disabled = true; btn.textContent = 'Memproses…';
+  const data = await apiLogin(username, password);
+  btn.disabled = false; btn.textContent = 'Masuk';
+  if (!data.ok){
+    showLoginScreen(data.error || 'Login gagal.');
+    return;
+  }
+  state.auth = { token:data.token, username:data.user.username, role:data.user.role, nama:data.user.nama };
+  sessionStorage.setItem(SESSION_STORAGE_KEY, data.token);
+  state.submissions = mapSubmissions(data.submissions);
+  state.realisasi = mapRealisasi(data.realisasi);
+  state.connected = true;
+  showAppShell();
+  renderAll();
+  startPolling();
+});
+
+async function initApp(){
+  const { data } = await supabaseClient.auth.getSession();
+  if (!data?.session){
+    showLoginScreen(null);
+    renderConnectionBanner();
+    return;
+  }
+
+  const session = data.session;
+  const profileData = await apiGetSession();
+  if (!profileData || !profileData.ok){
+    await supabaseClient.auth.signOut();
+    showLoginScreen(null);
+    return;
+  }
+
+  state.auth = {
+    token:session.access_token,
+    username:profileData.user.username,
+    role:profileData.user.role,
+    nama:profileData.user.nama,
+    unitKerjaId:profileData.user.unitKerjaId,
+    unitKode:profileData.user.unitKode,
+    unitNama:profileData.user.unitNama
+  };
+  state.submissions = mapSubmissions(profileData.submissions);
+  state.realisasi = mapRealisasi(profileData.realisasi);
+  state.connected = true;
+  showAppShell();
+  renderAll();
+  startPolling();
+}
+
+initApp();
+
+
+  // Cegah nilai input angka berubah hanya karena scroll mouse saat kursor berada di atas field.
+  document.addEventListener('wheel', function(e){
+    const target = e.target;
+    if (target && target.matches && target.matches('input[type="number"]')) {
+      e.preventDefault();
+    }
+  }, { passive: false });
+</script>
+</body>
+</html>
