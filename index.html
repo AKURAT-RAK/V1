@@ -1278,7 +1278,7 @@ async function apiLogin(username, password){
       ok:true,
       token:data.session?.access_token || '',
       user,
-      submissions: await fetchSubmissions(),
+      submissions: await fetchSubmissions(profile),
       realisasi: await fetchRealisasi()
     };
   } catch(err){
@@ -1295,8 +1295,8 @@ async function apiLogout(){
   }
 }
 
-async function fetchSubmissions(){
-  const { data: rakRows, error: rakError } = await supabaseClient
+async function fetchSubmissions(profile=null){
+  let rakQuery = supabaseClient
     .from('rak')
     .select(`
       id,
@@ -1308,6 +1308,7 @@ async function fetchSubmissions(){
       sub_kegiatan,
       kode_rekening,
       uraian_rekening,
+      uraian_kebutuhan,
       pagu,
       januari,
       februari,
@@ -1322,7 +1323,15 @@ async function fetchSubmissions(){
       november,
       desember,
       created_at
-    `)
+    `);
+
+  // PPTK hanya mengambil RAK dari Sub Unit yang menjadi kewenangannya.
+  // Kasubbag Keuangan dan Admin tetap dapat melihat seluruh Sub Unit.
+  if (profile?.role === 'pptk' && profile?.unit_kerja_id) {
+    rakQuery = rakQuery.eq('unit_kerja_id', profile.unit_kerja_id);
+  }
+
+  const { data: rakRows, error: rakError } = await rakQuery
     .order('created_at', { ascending:false });
 
   if (rakError) {
@@ -1376,7 +1385,7 @@ async function fetchSubmissions(){
       subKegiatan:r.sub_kegiatan,
       belanjaKode:r.kode_rekening,
       belanjaUraian:r.uraian_rekening || '',
-      uraian:r.uraian_rekening || '',
+      uraian:r.uraian_kebutuhan || '',
       monthly,
       total:Object.values(monthly).reduce((a,b)=>a+b,0),
       status:v?.status === 'sesuai' ? 'diverifikasi' :
@@ -1384,7 +1393,7 @@ async function fetchSubmissions(){
       catatan:v?.catatan || '',
       diverifikasiOleh:v?.diverifikasi_oleh || '',
       diverifikasiAt:v?.diverifikasi_at || '',
-      createdBy:r.pptk?.nama || 'Supabase'
+      createdBy:r.pptk?.nama || '—'
     };
   });
 }
@@ -1428,7 +1437,7 @@ async function fetchRealisasi(){
     uraianTransaksi:r.uraian_transaksi || '',
     jumlah:Number(r.jumlah)||0,
     jenisTransaksi:r.jenis_transaksi || 'realisasi',
-    createdBy:r.pptk?.nama || 'Supabase'
+    createdBy:r.pptk?.nama || '—'
   }));
 }
 
@@ -1494,6 +1503,7 @@ async function apiCreateSubmission(payload){
       sub_kegiatan:payload.subKegiatan,
       kode_rekening:payload.belanjaKode,
       uraian_rekening:payload.belanjaUraian || payload.uraian,
+      uraian_kebutuhan:payload.uraian || '',
       pagu:Number(selectedMaster.pagu)||0,
       januari:Number(monthly.jan)||0,
       februari:Number(monthly.feb)||0,
@@ -2037,12 +2047,21 @@ function renderInputHistory(){
   const body = document.getElementById('in-history-body');
   const empty = document.getElementById('in-history-empty');
   body.innerHTML = '';
-  if (state.submissions.length === 0){
+
+  // Riwayat Pengajuan: PPTK hanya melihat pengajuan dari Sub Unit-nya.
+  // Kasubbag Keuangan dan Admin tetap melihat seluruh Sub Unit.
+  const visibleSubmissions = state.auth.role === 'pptk'
+    ? state.submissions.filter(s =>
+        normalizeSubUnitCode(s.subUnitCode || '') === normalizeSubUnitCode(state.auth.unitKode || '')
+      )
+    : state.submissions;
+
+  if (visibleSubmissions.length === 0){
     empty.style.display = 'block';
     return;
   }
   empty.style.display = 'none';
-  state.submissions.forEach(s=>{
+  visibleSubmissions.forEach(s=>{
     body.appendChild(el('tr',{},[
       textNode('td','',s.subUnit),
       textNode('td','',s.subKegiatan),
@@ -2301,7 +2320,10 @@ function buildDetailRow(s, colspan){
     textNode('div','v', s.belanjaKode + ' — ' + s.belanjaUraian),
     el('div',{class:'v'},[statusBadge(s.status)]),
     textNode('div','v', s.id),
+    textNode('div','k','Uraian Rencana Kebutuhan'),
     textNode('div','k','Diajukan Oleh'),
+    textNode('div','',''),
+    textNode('div','v', s.uraian || '—'),
     textNode('div','v', s.createdBy || '—'),
     textNode('div','',''),
   ]);
@@ -2600,7 +2622,15 @@ document.getElementById('login-form').addEventListener('submit', async (e)=>{
     showLoginScreen(data.error || 'Login gagal.');
     return;
   }
-  state.auth = { token:data.token, username:data.user.username, role:data.user.role, nama:data.user.nama };
+  state.auth = {
+    token:data.token,
+    username:data.user.username,
+    role:data.user.role,
+    nama:data.user.nama,
+    unitKerjaId:data.user.unitKerjaId,
+    unitKode:data.user.unitKode,
+    unitNama:data.user.unitNama
+  };
   sessionStorage.setItem(SESSION_STORAGE_KEY, data.token);
   state.submissions = mapSubmissions(data.submissions);
   state.realisasi = mapRealisasi(data.realisasi);
