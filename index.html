@@ -1158,23 +1158,42 @@ RAK_LEAF_ITEMS.forEach(item => {
 });
 
 /* ---------- Realisasi map: dibangun dari transaksi yang diinput Subbag Keuangan ---------- */
-function realisasiKey(subKegiatanCode, kodeRekening){
-  return subKegiatanCode + '::' + kodeRekening;
+/* Kode Sub Unit di master RAK menggunakan kode program lengkap, sedangkan
+   tabel unit_kerja Supabase menggunakan kode singkat (mis. UPT-UTARA).
+   Semua data dashboard dinormalisasi ke kode master agar filter Sub Unit
+   tidak kehilangan RAK/realisasi yang sudah diinput. */
+const UNIT_MASTER_CODE_BY_DB_CODE = {
+  'SEK':'1.05.0.00.0.00.02.0001',
+  'PENCEGAHAN':'1.05.0.00.0.00.02.0002',
+  'PEMADAMAN':'1.05.0.00.0.00.02.0003',
+  'PENYELAMATAN':'1.05.0.00.0.00.02.0004',
+  'SARPRAS-DATIN':'1.05.0.00.0.00.02.0005',
+  'UPT-UTARA':'1.05.0.00.0.00.02.0006',
+  'UPT-BARAT':'1.05.0.00.0.00.02.0007',
+  'UPT-TIMUR':'1.05.0.00.0.00.02.0008',
+  'UPT-SELATAN':'1.05.0.00.0.00.02.0009'
+};
+function normalizeSubUnitCode(code){
+  return UNIT_MASTER_CODE_BY_DB_CODE[code] || code || '';
+}
+function realisasiKey(subUnitCode, subKegiatanCode, kodeRekening){
+  return normalizeSubUnitCode(subUnitCode) + '::' + subKegiatanCode + '::' + kodeRekening;
 }
 function buildRealisasiMap(entries){
   const map = {};
   entries.forEach(e => {
-    const key = realisasiKey(e.subKegiatanCode, e.kodeRekening);
+    const key = realisasiKey(e.subUnitCode, e.subKegiatanCode, e.kodeRekening);
     if (!map[key]) map[key] = Object.fromEntries(MONTHS.map(m=>[m,0]));
     const d = new Date(e.tanggal);
     if (isNaN(d.getTime())) return;
     const m = MONTHS[d.getMonth()];
-    map[key][m] += (Number(e.jumlah) || 0);
+    const sign = e.jenisTransaksi === 'pengembalian' ? -1 : 1;
+    map[key][m] += (Number(e.jumlah) || 0) * sign;
   });
   return map;
 }
 function realisasiForItem(item, map){
-  const key = realisasiKey(item.sub_kegiatan_code, item.kode_rekening);
+  const key = realisasiKey(item.sub_unit_code, item.sub_kegiatan_code, item.kode_rekening);
   return map[key] || Object.fromEntries(MONTHS.map(m=>[m,0]));
 }
 
@@ -1351,7 +1370,7 @@ async function fetchSubmissions(){
     };
     return {
       id:r.id,
-      subUnitCode:r.unit_kerja?.kode || '',
+      subUnitCode:normalizeSubUnitCode(r.unit_kerja?.kode || ''),
       subUnit:r.unit_kerja?.nama || '',
       subKegiatanCode:r.sub_kegiatan_code,
       subKegiatan:r.sub_kegiatan,
@@ -1398,7 +1417,7 @@ async function fetchRealisasi(){
 
   return (data || []).map(r => ({
     id:r.id,
-    subUnitCode:r.unit_kerja?.kode || '',
+    subUnitCode:normalizeSubUnitCode(r.unit_kerja?.kode || ''),
     subUnit:r.unit_kerja?.nama || '',
     subKegiatanCode:r.sub_kegiatan_code,
     subKegiatan:r.sub_kegiatan,
@@ -1453,18 +1472,9 @@ async function apiCreateSubmission(payload){
   );
   if (!selectedMaster) return { ok:false, error:'RAK_MASTER_NOT_FOUND' };
 
-  const UNIT_CODE_MAP = {
-    '1.05.0.00.0.00.02.0001':'SEK',
-    '1.05.0.00.0.00.02.0002':'PENCEGAHAN',
-    '1.05.0.00.0.00.02.0003':'PEMADAMAN',
-    '1.05.0.00.0.00.02.0004':'PENYELAMATAN',
-    '1.05.0.00.0.00.02.0005':'SARPRAS-DATIN',
-    '1.05.0.00.0.00.02.0006':'UPT-UTARA',
-    '1.05.0.00.0.00.02.0007':'UPT-BARAT',
-    '1.05.0.00.0.00.02.0008':'UPT-TIMUR',
-    '1.05.0.00.0.00.02.0009':'UPT-SELATAN'
-  };
-  const unitCode = UNIT_CODE_MAP[selectedMaster.sub_unit_code];
+  const unitCode = Object.keys(UNIT_MASTER_CODE_BY_DB_CODE).find(
+    code => UNIT_MASTER_CODE_BY_DB_CODE[code] === selectedMaster.sub_unit_code
+  );
   if (!unitCode) return { ok:false, error:'UNIT_MASTER_NOT_FOUND' };
   const unitId = await getUnitIdByCode(unitCode);
   if (!unitId) return { ok:false, error:'UNIT_PROFILE_NOT_FOUND' };
@@ -1661,14 +1671,18 @@ document.querySelectorAll('.nav-item[data-page]').forEach(btn => {
 
 /* ================= DASHBOARD ================= */
 function getApprovedAsLeafItems(){
-  return state.submissions.filter(s=>s.status==='diverifikasi').map(s => ({
+  // Semua RAK yang sudah diinput tetap dihitung sebagai RAK pada Dashboard,
+  // termasuk yang masih menunggu verifikasi. Status verifikasi ditampilkan
+  // pada menu Verifikasi dan tidak menghilangkan nilai RAK dari Dashboard.
+  return state.submissions.map(s => ({
     sub_unit_code: s.subUnitCode, sub_unit: s.subUnit,
     sub_kegiatan_code: s.subKegiatanCode, sub_kegiatan: s.subKegiatan,
     kode_rekening: s.belanjaKode, uraian: s.belanjaUraian || s.uraian,
     pagu: 0, // pengajuan PPTK menambah RAK, bukan menambah Pagu resmi
     total_rak: s.total,
     monthly: s.monthly,
-    id: 'approved-' + s.id,
+    status_rak: s.status,
+    id: 'rak-input-' + s.id,
   }));
 }
 function getAllItems(){
@@ -1683,9 +1697,21 @@ function getFilteredItems(f){
 }
 function aggregateMonthly(items){
   const realMap = buildRealisasiMap(state.realisasi);
+  /*
+     RAK dan master pagu boleh memiliki lebih dari satu baris yang merujuk
+     ke kombinasi Sub Unit + Sub Kegiatan + Kode Rekening yang sama.
+     Realisasi adalah transaksi, jadi TIDAK boleh dijumlahkan ulang untuk
+     setiap baris master/RAK. Jika tidak, satu transaksi Rp1.750.000 bisa
+     terbaca 2x, 3x, dst. ketika baris master dan input RAK ikut tampil.
+     Karena itu realisasi dijumlahkan berdasarkan key unik saja.
+  */
+  const realKeys = [...new Set(items.map(i =>
+    realisasiKey(i.sub_unit_code, i.sub_kegiatan_code, i.kode_rekening)
+  ))];
+
   return MONTHS.map(m => {
     const rak = items.reduce((a,i)=>a+(i.monthly[m]||0),0);
-    const real = items.reduce((a,i)=>a+(realisasiForItem(i, realMap)[m]||0),0);
+    const real = realKeys.reduce((a,key)=>a+((realMap[key] && realMap[key][m])||0),0);
     return { rak, real, dev: rak - real, pct: rak > 0 ? (real/rak*100) : (real>0?null:0) };
   });
 }
@@ -2290,14 +2316,25 @@ function buildDetailRow(s, colspan){
   }
 
   if (s._rejecting){
+    // Simpan draft alasan di object state supaya tidak hilang saat polling
+    // Supabase melakukan render ulang setiap beberapa detik.
     const ta = el('textarea',{placeholder:'Tuliskan alasan penolakan…'},[]);
+    ta.value = s._rejectReason || '';
+    ta.addEventListener('input', ()=>{ s._rejectReason = ta.value; });
+
     const saveBtn = el('button',{class:'btn danger-outline small'},[]); saveBtn.textContent = 'Simpan Penolakan';
     saveBtn.addEventListener('click', ()=>{
-      if (!ta.value.trim()){ showToast('Isi alasan penolakan.'); return; }
-      rejectSubmission(s.id, ta.value.trim());
+      const alasan = ta.value.trim();
+      if (!alasan){ showToast('Isi alasan penolakan.'); return; }
+      s._rejectReason = alasan;
+      rejectSubmission(s.id, alasan);
     });
     const cancelBtn = el('button',{class:'btn secondary small'},[]); cancelBtn.textContent='Batal';
-    cancelBtn.addEventListener('click', ()=>{ s._rejecting=false; renderVerify(); });
+    cancelBtn.addEventListener('click', ()=>{
+      s._rejecting=false;
+      s._rejectReason='';
+      renderVerify();
+    });
     box.appendChild(el('div',{class:'reject-box'},[ta, saveBtn, cancelBtn]));
   }
 
@@ -2344,6 +2381,7 @@ async function rejectSubmission(id, catatan){
     s.status = 'ditolak';
     s.catatan = catatan;
     s._rejecting = false;
+    s._rejectReason = '';
     state.expandedVerify = null;
     renderVerify();
     showToast('Pengajuan ' + s.id + ' dipindahkan ke Riwayat Proses.');
@@ -2442,7 +2480,7 @@ function renderConnectionBanner(){
 /* ---------- sync loop against the shared Supabase backend ---------- */
 function mapSubmissions(arr){
   return (arr || []).map(s => ({
-    id: s.id, subUnitCode: s.subUnitCode, subUnit: s.subUnit,
+    id: s.id, subUnitCode: normalizeSubUnitCode(s.subUnitCode), subUnit: s.subUnit,
     subKegiatanCode: s.subKegiatanCode, subKegiatan: s.subKegiatan,
     belanjaKode: s.belanjaKode, belanjaUraian: s.belanjaUraian,
     uraian: s.uraian, monthly: s.monthly, total: Number(s.total) || 0,
@@ -2452,7 +2490,7 @@ function mapSubmissions(arr){
 }
 function mapRealisasi(arr){
   return (arr || []).map(r => ({
-    id: r.id, subUnitCode: r.subUnitCode, subUnit: r.subUnit,
+    id: r.id, subUnitCode: normalizeSubUnitCode(r.subUnitCode), subUnit: r.subUnit,
     subKegiatanCode: r.subKegiatanCode, subKegiatan: r.subKegiatan,
     kodeRekening: r.kodeRekening, uraianRekening: r.uraianRekening,
     tanggal: r.tanggal, noBukti: r.noBukti, uraianTransaksi: r.uraianTransaksi,
@@ -2472,9 +2510,20 @@ async function syncSubmissions(){
     return;
   }
   state.connected = true;
-  const rejectingIds = new Set(state.submissions.filter(s=>s._rejecting).map(s=>s.id));
+  // Pertahankan form penolakan yang sedang dibuka beserta isi draft-nya
+  // ketika polling Supabase memicu render ulang.
+  const rejectingDrafts = new Map(
+    state.submissions
+      .filter(s=>s._rejecting)
+      .map(s=>[s.id, s._rejectReason || ''])
+  );
   const remote = mapSubmissions(data.submissions);
-  remote.forEach(r => { if (rejectingIds.has(r.id)) r._rejecting = true; });
+  remote.forEach(r => {
+    if (rejectingDrafts.has(r.id)){
+      r._rejecting = true;
+      r._rejectReason = rejectingDrafts.get(r.id);
+    }
+  });
   state.submissions = remote;
   state.realisasi = mapRealisasi(data.realisasi);
   renderAll();
