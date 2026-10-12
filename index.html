@@ -1257,9 +1257,32 @@ function profileToUser(profile){
   };
 }
 
+// Username tampilan baru dipetakan ke email Auth internal yang sudah ada.
+// Ini menjaga akun, password, dan auth_user_id lama tetap terhubung.
+const LOGIN_EMAIL_BY_USERNAME = {
+  'pptk.sekretariat1': 'pptk.nazla@akurat-rak.local',
+  'pptk.sekretariat2': 'pptk.asri@akurat-rak.local',
+  'pptk.penyelamatan1': 'pptk.sugianto@akurat-rak.local',
+  'pptk.penyelamatan2': 'pptk.ridwan@akurat-rak.local',
+  'pptk.pencegahan1': 'pptk.agus@akurat-rak.local',
+  'pptk.pencegahan2': 'pptk.indra@akurat-rak.local',
+  'pptk.pemadaman1': 'pptk.asep.rahmat@akurat-rak.local',
+  'pptk.pemadaman2': 'pptk.udan@akurat-rak.local',
+  'pptk.sarpras1': 'pptk.ivan@akurat-rak.local',
+  'pptk.sarpras2': 'pptk.riky@akurat-rak.local',
+  'pptk.utara': 'pptk.dini@akurat-rak.local',
+  'pptk.barat': 'pptk.ade@akurat-rak.local',
+  'pptk.timur': 'pptk.sarip@akurat-rak.local',
+  'pptk.selatan': 'pptk.mulyadi@akurat-rak.local',
+  'kasubbag.keuangan': 'kasubbag.keuangan@akurat-rak.local',
+  'admin': 'admin@akurat-rak.local'
+};
+
 async function apiLogin(username, password){
   try{
-    const loginEmail = `${String(username).trim().toLowerCase()}@akurat-rak.local`;
+    const normalizedUsername = String(username).trim().toLowerCase();
+    const loginEmail = LOGIN_EMAIL_BY_USERNAME[normalizedUsername];
+    if (!loginEmail) return { ok:false, error:'Username tidak dikenali. Periksa kembali username yang diberikan.' };
     const { data, error } = await supabaseClient.auth.signInWithPassword({
       email: loginEmail,
       password
