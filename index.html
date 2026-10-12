@@ -2497,8 +2497,27 @@ function renderUserBadge(){
   }
   box.style.display = 'block';
   const roleLabel = { pptk:'PPTK', keuangan:'Subbag Keuangan', admin:'Administrator' }[state.auth.role] || state.auth.role;
+  const profileDisplayNames = {
+    'pptk.sekretariat1':'PPTK Sekretariat 1',
+    'pptk.sekretariat2':'PPTK Sekretariat 2',
+    'pptk.penyelamatan1':'PPTK Bidang Penyelamatan 1',
+    'pptk.penyelamatan2':'PPTK Bidang Penyelamatan 2',
+    'pptk.pencegahan1':'PPTK Bidang Pencegahan 1',
+    'pptk.pencegahan2':'PPTK Bidang Pencegahan 2',
+    'pptk.pemadaman1':'PPTK Bidang Pemadaman 1',
+    'pptk.pemadaman2':'PPTK Bidang Pemadaman 2',
+    'pptk.sarpras1':'PPTK Sarpras 1',
+    'pptk.sarpras2':'PPTK Sarpras 2',
+    'pptk.utara':'PPTK UPT Utara',
+    'pptk.barat':'PPTK UPT Barat',
+    'pptk.timur':'PPTK UPT Timur',
+    'pptk.selatan':'PPTK UPT Selatan',
+    'kasubbag.keuangan':'Kasubbag Keuangan',
+    'admin':'Admin AKURAT-RAK'
+  };
+  const profileDisplayName = profileDisplayNames[state.auth.username] || roleLabel;
   box.innerHTML = '';
-  box.appendChild(el('div',{class:'user-name'},[document.createTextNode(state.auth.nama || state.auth.username)]));
+  box.appendChild(el('div',{class:'user-name'},[document.createTextNode(profileDisplayName)]));
   box.appendChild(el('div',{class:'user-role'},[document.createTextNode(roleLabel)]));
   const logoutBtn = el('button',{class:'btn secondary small',style:'margin-top:8px;width:100%;'},[]);
   logoutBtn.textContent = 'Keluar';
@@ -2709,4 +2728,5 @@ initApp();
 </script>
 </body>
 </html>
+
 
