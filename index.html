@@ -866,7 +866,7 @@ td.num{white-space:nowrap;}
       <div class="cards" id="dash-cards"></div>
 
       <div class="panel" style="margin-bottom:20px;">
-        <div class="panel-title">RAK vs Realisasi per Bulan <span class="hint">Tahun Anggaran 2027</span></div>
+        <div class="panel-title">RAK vs Realisasi per Bulan <span class="hint">Tahun Anggaran 2026</span></div>
         <div class="chart-wrap">
           <div class="legend">
             <span><i style="background:var(--navy)"></i>RAK</span>
@@ -1170,6 +1170,29 @@ function textNode(tag, cls, text){
 RAK_LEAF_ITEMS.forEach(item => {
   item.id = item.kode_rekening + '::' + item.sub_kegiatan_code;
 });
+
+const PPTK_SUBKEGIATAN_BY_USERNAME = {"pptk.sekretariat1":["1.05.01.2.01.0001","1.05.01.2.01.0007"],"pptk.sekretariat2":["1.05.01.2.02.0001","1.05.01.2.05.0002","1.05.01.2.06.0001","1.05.01.2.06.0002","1.05.01.2.06.0003","1.05.01.2.06.0004","1.05.01.2.06.0005","1.05.01.2.06.0008","1.05.01.2.06.0009","1.05.01.2.08.0002","1.05.01.2.08.0003","1.05.01.2.08.0004","1.05.01.2.09.0002","1.05.01.2.09.0009","1.05.01.2.09.0011"],"pptk.penyelamatan1":["1.05.04.2.01.0003","1.05.04.2.05.0001"],"pptk.penyelamatan2":["1.05.04.2.01.0018"],"pptk.pencegahan1":["1.05.04.2.01.0001","1.05.04.2.02.0001","1.05.04.2.04.0002","1.05.04.2.04.0013"],"pptk.pencegahan2":["1.05.04.2.02.0007","1.05.04.2.04.0001","1.05.04.2.04.0019"],"pptk.pemadaman1":["1.05.04.2.01.0002"],"pptk.pemadaman2":["1.05.04.2.01.0004"],"pptk.sarpras1":["1.05.04.2.01.0005","1.05.04.2.01.0017"],"pptk.sarpras2":["1.05.04.2.01.0008"],"pptk.utara":["1.05.04.2.01.0001"],"pptk.barat":["1.05.04.2.01.0001"],"pptk.timur":["1.05.04.2.01.0001"],"pptk.selatan":["1.05.04.2.01.0001"]};
+
+function normalizeActivityCode(code){
+  return String(code || '').replace(/[^0-9]/g, '');
+}
+function getAllowedActivityCodes(user = state.auth){
+  if (!user || user.role !== 'pptk') return null; // keuangan/admin tidak dibatasi oleh daftar PPTK
+  const username = String(user.username || '').trim().toLowerCase();
+  const codes = PPTK_SUBKEGIATAN_BY_USERNAME[username];
+  return Array.isArray(codes) ? new Set(codes.map(normalizeActivityCode)) : new Set();
+}
+function isActivityAllowedForCurrentUser(item, user = state.auth){
+  if (!user || user.role !== 'pptk') return true;
+  const allowed = getAllowedActivityCodes(user);
+  return !!allowed && allowed.has(normalizeActivityCode(item?.sub_kegiatan_code || item?.subKegiatanCode));
+}
+function allowedMasterItemsForCurrentUser(items){
+  const user = state.auth;
+  if (!user || user.role !== 'pptk') return items;
+  return items.filter(item => isActivityAllowedForCurrentUser(item, user));
+}
+
 
 /* ---------- Realisasi map: dibangun dari transaksi yang diinput Subbag Keuangan ---------- */
 /* Kode Sub Unit di master RAK menggunakan kode program lengkap, sedangkan
@@ -1517,6 +1540,7 @@ async function apiCreateSubmission(payload){
     i.kode_rekening === payload.belanjaKode
   );
   if (!selectedMaster) return { ok:false, error:'RAK_MASTER_NOT_FOUND' };
+  if (!isActivityAllowedForCurrentUser(selectedMaster, profileToUser(profile))) return { ok:false, error:'ACTIVITY_ACCESS_DENIED' };
 
   const unitCode = Object.keys(UNIT_MASTER_CODE_BY_DB_CODE).find(
     code => UNIT_MASTER_CODE_BY_DB_CODE[code] === selectedMaster.sub_unit_code
@@ -1610,8 +1634,9 @@ async function apiAddRealisasi(payload){
   const profile = await getCurrentProfile();
   if (!profile) return { ok:false, error:'PROFILE_INVALID' };
 
-  const selectedMaster = RAK_LEAF_ITEMS.find(i => i.sub_unit_code === payload.subUnitCode);
+  const selectedMaster = RAK_LEAF_ITEMS.find(i => i.sub_unit_code === payload.subUnitCode && i.sub_kegiatan_code === payload.subKegiatanCode && i.kode_rekening === payload.kodeRekening);
   if (!selectedMaster) return { ok:false, error:'SUBUNIT_MASTER_NOT_FOUND' };
+  if (!isActivityAllowedForCurrentUser(selectedMaster, profileToUser(profile))) return { ok:false, error:'ACTIVITY_ACCESS_DENIED' };
 
   const UNIT_CODE_MAP = {
     '1.05.0.00.0.00.02.0001':'SEK',
@@ -1988,7 +2013,8 @@ function populateInputSelects(){
   const belanjaSel = document.getElementById('in-belanja');
 
   if (!subUnitSel.dataset.filled){
-    const subUnits = uniqBy(RAK_LEAF_ITEMS, i=>i.sub_unit_code).map(i=>({code:i.sub_unit_code,name:i.sub_unit}));
+    const inputMasterItems = allowedMasterItemsForCurrentUser(RAK_LEAF_ITEMS);
+    const subUnits = uniqBy(inputMasterItems, i=>i.sub_unit_code).map(i=>({code:i.sub_unit_code,name:i.sub_unit}));
     subUnitSel.innerHTML = '<option value="">Pilih Sub Unit…</option>' +
       subUnits.map(u=>`<option value="${u.code}">${u.code} — ${u.name}</option>`).join('');
     subUnitSel.dataset.filled = '1';
@@ -1996,7 +2022,7 @@ function populateInputSelects(){
   subUnitSel.value = state.input.subUnit;
 
   if (state.input.subUnit){
-    const pool = RAK_LEAF_ITEMS.filter(i=>i.sub_unit_code===state.input.subUnit);
+    const pool = allowedMasterItemsForCurrentUser(RAK_LEAF_ITEMS).filter(i=>i.sub_unit_code===state.input.subUnit);
     const subKegs = uniqBy(pool, i=>i.sub_kegiatan_code).map(i=>({code:i.sub_kegiatan_code,name:i.sub_kegiatan}));
     subKegSel.disabled = false;
     subKegSel.innerHTML = '<option value="">Pilih Sub Kegiatan…</option>' +
@@ -2008,7 +2034,7 @@ function populateInputSelects(){
   }
 
   if (state.input.subKegiatan){
-    const pool = RAK_LEAF_ITEMS.filter(i=>i.sub_unit_code===state.input.subUnit && i.sub_kegiatan_code===state.input.subKegiatan);
+    const pool = allowedMasterItemsForCurrentUser(RAK_LEAF_ITEMS).filter(i=>i.sub_unit_code===state.input.subUnit && i.sub_kegiatan_code===state.input.subKegiatan);
     const belanjas = uniqBy(pool, i=>i.kode_rekening).map(i=>({code:i.kode_rekening,name:i.uraian}));
     belanjaSel.disabled = false;
     belanjaSel.innerHTML = '<option value="">Pilih Belanja / Kode Rekening…</option>' +
@@ -2175,7 +2201,7 @@ function populateRealisasiSelects(){
   const belanjaSel = document.getElementById('rl-belanja');
   if (!subUnitSel) return;
 
-  const allItems = getAllItems();
+  const allItems = allowedMasterItemsForCurrentUser(getAllItems());
   if (!subUnitSel.dataset.filled){
     const subUnits = uniqBy(allItems, i=>i.sub_unit_code).map(i=>({code:i.sub_unit_code,name:i.sub_unit}));
     subUnitSel.innerHTML = '<option value="">Pilih Sub Unit…</option>' +
@@ -2240,7 +2266,9 @@ document.getElementById('rl-submit') && document.getElementById('rl-submit').add
   const jumlah = parseFloat(d.jumlah) || 0;
   if (jumlah <= 0){ showToast('Isi jumlah realisasi.'); return; }
 
-  const allItems = getAllItems();
+  const allItems = allowedMasterItemsForCurrentUser(getAllItems());
+  const chosenActivity = allItems.find(i=>i.sub_unit_code===d.subUnit && i.sub_kegiatan_code===d.subKegiatan && i.kode_rekening===d.belanja);
+  if (!chosenActivity){ showToast('Subkegiatan atau rekening tidak termasuk kewenangan akun ini.'); return; }
   const subUnitObj = allItems.find(i=>i.sub_unit_code===d.subUnit);
   const subKegObj = allItems.find(i=>i.sub_kegiatan_code===d.subKegiatan);
   const belanjaObj = allItems.find(i=>i.kode_rekening===d.belanja && i.sub_kegiatan_code===d.subKegiatan);
@@ -2263,6 +2291,7 @@ document.getElementById('rl-submit') && document.getElementById('rl-submit').add
       if (result && result.error === 'SESSION_INVALID'){ forceLogout('Sesi berakhir, silakan login kembali.'); return; }
       const msgMap = {
         PROFILE_INVALID:'Profil PPTK belum terhubung dengan akun.',
+        ACTIVITY_ACCESS_DENIED:'Subkegiatan tersebut bukan kewenangan akun PPTK ini.',
         SUBUNIT_MASTER_NOT_FOUND:'Sub Unit tidak ditemukan pada master.',
         UNIT_NOT_ALLOWED:'Kamu hanya dapat menginput untuk unit yang terhubung ke akun ini.',
         UNIT_PROFILE_INVALID:'Unit pada profil PPTK belum lengkap.'
