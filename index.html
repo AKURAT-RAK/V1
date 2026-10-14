@@ -1113,8 +1113,9 @@ const MONTH_LABELS = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt
 
 /* ---------- helpers ---------- */
 function rp(n){
-  const v = Math.round(n || 0);
-  return 'Rp ' + v.toLocaleString('id-ID');
+  // Tampilkan nominal sampai 2 angka desimal sesuai dokumen anggaran; jangan dibulatkan ke rupiah utuh.
+  const v = Number(n || 0);
+  return 'Rp ' + v.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 function pct(n){
   if (n === null || n === undefined || !isFinite(n)) return '—';
