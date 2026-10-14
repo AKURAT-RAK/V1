@@ -886,6 +886,7 @@ td.num{white-space:nowrap;}
                 <th class="num">RAK</th>
                 <th class="num">Realisasi</th>
                 <th class="num">Deviasi (RAK−Realisasi)</th>
+                <th class="num">% Deviasi</th>
                 <th class="num">% Realisasi</th>
               </tr>
             </thead>
@@ -980,6 +981,12 @@ td.num{white-space:nowrap;}
         <p>Verifikasi pengajuan rencana kebutuhan dari PPTK sebagai bahan penyusunan/pemutakhiran RAK. Fitur ini tersedia untuk Subbag Keuangan dan Admin.</p>
       </div>
 
+      <div class="filterbar" style="margin-bottom:16px;">
+        <div class="field">
+          <label>Filter Sub Unit Verifikasi</label>
+          <select id="verify-subunit-filter"><option value="">Semua Sub Unit</option></select>
+        </div>
+      </div>
       <div class="section-label">Menunggu Verifikasi</div>
       <div class="panel" style="margin-bottom:24px;">
         <div class="table-wrap"><table class="wide">
@@ -1077,6 +1084,12 @@ td.num{white-space:nowrap;}
       </div>
 
       <div class="section-label">Riwayat Realisasi Tercatat</div>
+      <div class="filterbar" style="margin-bottom:16px;">
+        <div class="field">
+          <label>Filter Sub Unit Realisasi</label>
+          <select id="rl-history-subunit-filter"><option value="">Semua Sub Unit</option></select>
+        </div>
+      </div>
       <div class="panel">
         <div class="table-wrap"><table class="wide">
           <thead>
@@ -1665,6 +1678,8 @@ const state = {
   realisasi: [],
   realCounter: 1,
   expandedVerify: null,
+  verifySubUnitFilter: '',
+  realHistorySubUnitFilter: '',
   subCounter: 1,
   connected: false,   // true once successfully talking to the shared backend
   syncing: false,
@@ -1792,19 +1807,24 @@ function populateDashboardFilters(){
     if (state.filters.belanja === '5.1.02.01.001.00024') state.filters.belanja = '';
   }
   // Sekretariat > Penyediaan Bahan: pilihan yang benar 00036, 00043, dan 00052.
-  if (state.filters.subUnit === '1.05.0.00.0.00.02.0001' && state.filters.subKegiatan === '1.05.01.2.06.0004') {
-    bPool = bPool.filter(i => i.kode_rekening !== '5.1.02.01.001.00035');
-    if (state.filters.belanja === '5.1.02.01.001.00035') state.filters.belanja = '';
-  }
-  // Pengaman akhir: untuk Sekretariat > Penyediaan Bahan, pastikan rekening 00035
-  // tidak muncul di opsi Dashboard, termasuk bila filter dirender ulang dari pilihan lama.
+  // Normalisasi string untuk menghindari perbedaan spasi/format kode dari sumber data.
+  const selectedUnitCode = String(state.filters.subUnit || '').trim();
+  const selectedActivityCode = String(state.filters.subKegiatan || '').trim();
   const isSekretariatPenyediaanBahan =
-    state.filters.subUnit === '1.05.0.00.0.00.02.0001' &&
-    state.filters.subKegiatan === '1.05.01.2.06.0004';
+    selectedUnitCode === '1.05.0.00.0.00.02.0001' &&
+    (selectedActivityCode === '1.05.01.2.06.0004' ||
+     (selectedActivityCode.endsWith('.0004') &&
+      skPool.some(i => String(i.sub_kegiatan_code || '').trim() === selectedActivityCode &&
+        /penyediaan bahan/i.test(String(i.sub_kegiatan || '')))));
+  if (isSekretariatPenyediaanBahan) {
+    bPool = bPool.filter(i => String(i.kode_rekening || '').trim() !== '5.1.02.01.001.00035');
+    if (String(state.filters.belanja || '').trim() === '5.1.02.01.001.00035') state.filters.belanja = '';
+  }
+  // Pengaman akhir untuk mencegah rekening 00035 muncul pada kombinasi ini.
   const belanjas = uniqBy(bPool, i=>i.kode_rekening)
-    .filter(b => !(isSekretariatPenyediaanBahan && b.kode_rekening === '5.1.02.01.001.00035'))
+    .filter(b => !(isSekretariatPenyediaanBahan && String(b.kode_rekening || '').trim() === '5.1.02.01.001.00035'))
     .map(i=>({code:i.kode_rekening,name:i.uraian}));
-  if (isSekretariatPenyediaanBahan && state.filters.belanja === '5.1.02.01.001.00035') {
+  if (isSekretariatPenyediaanBahan && String(state.filters.belanja || '').trim() === '5.1.02.01.001.00035') {
     state.filters.belanja = '';
   }
   belanjaSel.innerHTML = '<option value="">Semua Belanja</option>' +
@@ -1846,7 +1866,7 @@ function renderCards(monthly, items){
     { cls:'', label:'Total Pagu', value: rp(pagu), sub: items.length + ' rincian belanja' },
     { cls: overPagu ? 'accent' : '', label:'Total RAK', value: rp(totalRak), sub: overPagu ? 'Melebihi Pagu sebesar ' + rp(totalRak - pagu) : 'Sesuai/di dalam Pagu' },
     { cls:'good', label:'Total Realisasi', value: rp(totalReal), sub: 'Berdasarkan SP2D / Kartu Kendali Kegiatan' },
-    { cls:'', label:'Deviasi (RAK − Realisasi)', value: rp(totalDev), sub: 'Rencana yang belum terserap' },
+    { cls:'', label:'Deviasi (RAK − Realisasi)', value: rp(totalDev), sub: 'Rencana yang belum terserap · ' + pct(totalRak > 0 ? (totalDev / totalRak * 100) : 0) + ' dari Total RAK' },
     { cls:'', label:'% Realisasi', value: pct(overallPct), sub: 'terhadap Total RAK' },
   ];
   items5.forEach(c=>{
@@ -1927,6 +1947,7 @@ function renderDashTable(monthly){
       textNode('td','num',rp(m.rak)),
       textNode('td','num',rp(m.real)),
       textNode('td','num ' + (m.dev>=0?'dev-pos':'dev-neg'), rp(m.dev)),
+      textNode('td','num',pct(m.rak > 0 ? (m.dev / m.rak * 100) : 0)),
       textNode('td','num',pct(m.pct)),
     ]);
     body.appendChild(tr);
@@ -1938,6 +1959,7 @@ function renderDashTable(monthly){
     textNode('td','num',rp(last.rak)),
     textNode('td','num',rp(last.real)),
     textNode('td','num',rp(last.dev)),
+    textNode('td','num',pct(last.rak > 0 ? (last.dev / last.rak * 100) : 0)),
     textNode('td','num',pct(last.pct)),
   ]));
 }
@@ -2257,12 +2279,40 @@ document.getElementById('rl-submit') && document.getElementById('rl-submit').add
   }
 });
 
+function populateSubUnitHistoryFilters(){
+  const units = uniqBy(RAK_LEAF_ITEMS, i => i.sub_unit_code).map(i => ({code:i.sub_unit_code, name:i.sub_unit}));
+  const verifySel = document.getElementById('verify-subunit-filter');
+  const historySel = document.getElementById('rl-history-subunit-filter');
+  if (verifySel) {
+    const current = state.verifySubUnitFilter || '';
+    verifySel.innerHTML = '<option value="">Semua Sub Unit</option>' + units.map(u => `<option value="${u.name}">${u.name}</option>`).join('');
+    verifySel.value = current;
+    if (!verifySel.dataset.bound) {
+      verifySel.addEventListener('change', e => { state.verifySubUnitFilter = e.target.value; renderVerify(); });
+      verifySel.dataset.bound = '1';
+    }
+  }
+  if (historySel) {
+    const current = state.realHistorySubUnitFilter || '';
+    historySel.innerHTML = '<option value="">Semua Sub Unit</option>' + units.map(u => `<option value="${u.name}">${u.name}</option>`).join('');
+    historySel.value = current;
+    if (!historySel.dataset.bound) {
+      historySel.addEventListener('change', e => { state.realHistorySubUnitFilter = e.target.value; renderRealisasiHistory(); });
+      historySel.dataset.bound = '1';
+    }
+  }
+}
+
 function renderRealisasiHistory(){
   const body = document.getElementById('rl-history-body');
   const empty = document.getElementById('rl-history-empty');
   if (!body) return;
   body.innerHTML = '';
-  const sorted = [...state.realisasi].sort((a,b) => (b.tanggal||'').localeCompare(a.tanggal||''));
+  populateSubUnitHistoryFilters();
+  const selectedUnit = state.realHistorySubUnitFilter;
+  const sorted = [...state.realisasi]
+    .filter(r => !selectedUnit || r.subUnit === selectedUnit)
+    .sort((a,b) => (b.tanggal||'').localeCompare(a.tanggal||''));
   if (sorted.length === 0){
     empty.style.display = 'block';
     return;
@@ -2308,8 +2358,11 @@ function renderVerify(){
   pendingBody.innerHTML = '';
   doneBody.innerHTML = '';
 
-  const pending = state.submissions.filter(s=>s.status==='menunggu');
-  const done = state.submissions.filter(s=>s.status!=='menunggu');
+  populateSubUnitHistoryFilters();
+  const selectedUnit = state.verifySubUnitFilter;
+  const unitMatches = s => !selectedUnit || s.subUnit === selectedUnit;
+  const pending = state.submissions.filter(s=>s.status==='menunggu' && unitMatches(s));
+  const done = state.submissions.filter(s=>s.status!=='menunggu' && unitMatches(s));
 
   pendingEmpty.style.display = pending.length ? 'none' : 'block';
   doneEmpty.style.display = done.length ? 'none' : 'block';
