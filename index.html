@@ -1770,7 +1770,15 @@ function populateDashboardFilters(){
     subKegs.map(s=>`<option value="${s.code}">${s.code} — ${s.name}</option>`).join('');
   subKegSel.value = state.filters.subKegiatan;
 
-  const bPool = skPool.filter(i => !state.filters.subKegiatan || i.sub_kegiatan_code === state.filters.subKegiatan);
+  let bPool = skPool.filter(i => !state.filters.subKegiatan || i.sub_kegiatan_code === state.filters.subKegiatan);
+  // Pada Bidang Penyelamatan > Kerja Sama dan Koordinasi antar Daerah,
+  // pilihan rekening yang benar hanya 5.1.02.01.001.00052.
+  // Sembunyikan rekening 00024 dari filter Dashboard untuk kombinasi ini saja;
+  // jangan menghapus data atau memengaruhi rekening 00024 di kegiatan lain.
+  if (state.filters.subUnit === '1.05.0.00.0.00.02.0004' && state.filters.subKegiatan === '1.05.04.2.01.0018') {
+    bPool = bPool.filter(i => i.kode_rekening !== '5.1.02.01.001.00024');
+    if (state.filters.belanja === '5.1.02.01.001.00024') state.filters.belanja = '';
+  }
   const belanjas = uniqBy(bPool, i=>i.kode_rekening).map(i=>({code:i.kode_rekening,name:i.uraian}));
   belanjaSel.innerHTML = '<option value="">Semua Belanja</option>' +
     belanjas.map(b=>`<option value="${b.code}">${b.code} — ${b.name}</option>`).join('');
