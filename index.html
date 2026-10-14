@@ -1668,6 +1668,14 @@ async function apiDeleteRealisasi(id){
   return error ? { ok:false, error:error.message } : { ok:true };
 }
 
+// Penghapusan permanen dijalankan di database melalui RPC agar seluruh
+// langkah berlangsung dalam satu transaksi dan hak akses diperiksa di server.
+// Fungsi SQL public.hapus_riwayat_verifikasi(p_rak_id uuid) harus dibuat terlebih dahulu.
+async function apiDeleteProcessedSubmission(id){
+  const { error } = await supabaseClient.rpc('hapus_riwayat_verifikasi', { p_rak_id: id });
+  return error ? { ok:false, error:error.message } : { ok:true };
+}
+
 /* ---------- app state ---------- */
 const state = {
   page: 'dashboard',
@@ -2409,7 +2417,33 @@ function buildVerifyRow(s, showActions){
       el('div',{style:'display:flex;gap:8px;'},[okBtn, noBtn])
     ]));
   } else {
-    tds.push(el('td',{},[statusBadge(s.status)]));
+    const statusCell = el('div',{style:'display:flex;align-items:center;justify-content:flex-start;gap:8px;flex-wrap:nowrap;white-space:nowrap;min-width:max-content;'},[statusBadge(s.status)]);
+    // Hanya Kasubbag Keuangan/Admin yang mendapat aksi hapus pada Riwayat Proses.
+    if (['keuangan','admin'].includes(state.auth?.role)) {
+      const delBtn = el('button',{class:'btn danger-outline small', style:'flex:0 0 auto;white-space:nowrap;'},[]);
+      delBtn.textContent = 'Hapus';
+      delBtn.title = 'Hapus permanen pengajuan dari Riwayat Proses';
+      delBtn.addEventListener('click', async (ev)=>{
+        ev.stopPropagation();
+        const ok = window.confirm('HAPUS PERMANEN pengajuan ini?\n\nSub Unit: ' + s.subUnit + '\nSub Kegiatan: ' + s.subKegiatan + '\nTotal: ' + rp(s.total) + '\n\nPengajuan, catatan verifikasi, dan tindak lanjut terkait akan dihapus. Data realisasi tidak dihapus. Tindakan ini tidak dapat dibatalkan.');
+        if (!ok) return;
+        if (!state.connected) {
+          showToast('Penghapusan permanen hanya tersedia saat terhubung ke Supabase.'); return;
+        }
+        delBtn.disabled = true;
+        const result = await apiDeleteProcessedSubmission(s.id);
+        if (!result.ok) {
+          console.error('delete processed submission failed:', result.error);
+          showToast('Gagal menghapus. Periksa kebijakan RLS Supabase. ' + (result.error || ''));
+          delBtn.disabled = false; return;
+        }
+        state.expandedVerify = null;
+        await syncSubmissions();
+        showToast('Pengajuan pada Riwayat Proses berhasil dihapus permanen.');
+      });
+      statusCell.appendChild(delBtn);
+    }
+    tds.push(el('td',{},[statusCell]));
   }
 
   return el('tr',{class:'row-clickable'}, tds);
