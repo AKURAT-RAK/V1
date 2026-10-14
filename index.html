@@ -1786,6 +1786,16 @@ function populateDashboardFilters(){
     bPool = bPool.filter(i => i.kode_rekening !== '5.1.02.01.001.00024');
     if (state.filters.belanja === '5.1.02.01.001.00024') state.filters.belanja = '';
   }
+  // Sekretariat > Evaluasi Kinerja Perangkat Daerah: hanya rekening 00026 dan 00052.
+  if (state.filters.subUnit === '1.05.0.00.0.00.02.0001' && state.filters.subKegiatan === '1.05.01.2.01.0007') {
+    bPool = bPool.filter(i => i.kode_rekening !== '5.1.02.01.001.00024');
+    if (state.filters.belanja === '5.1.02.01.001.00024') state.filters.belanja = '';
+  }
+  // Sekretariat > Penyediaan Bahan: pilihan yang benar 00036, 00043, dan 00052.
+  if (state.filters.subUnit === '1.05.0.00.0.00.02.0001' && state.filters.subKegiatan === '1.05.01.2.06.0004') {
+    bPool = bPool.filter(i => i.kode_rekening !== '5.1.02.01.001.00035');
+    if (state.filters.belanja === '5.1.02.01.001.00035') state.filters.belanja = '';
+  }
   const belanjas = uniqBy(bPool, i=>i.kode_rekening).map(i=>({code:i.kode_rekening,name:i.uraian}));
   belanjaSel.innerHTML = '<option value="">Semua Belanja</option>' +
     belanjas.map(b=>`<option value="${b.code}">${b.code} — ${b.name}</option>`).join('');
