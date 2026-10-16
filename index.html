@@ -1067,7 +1067,7 @@ td.num{white-space:nowrap;}
             </div>
             <div class="field">
               <label>Jumlah (Rp)</label>
-              <input type="number" id="rl-jumlah" step="1000" placeholder="0">
+              <input type="text" inputmode="decimal" id="rl-jumlah" placeholder="0,00">
             </div>
           </div>
 
@@ -1130,6 +1130,80 @@ function rp(n){
   const v = Number(n || 0);
   return 'Rp ' + v.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
+/* ===== NOMINAL-INPUT-START ===== */
+/* Input nominal: titik sebagai pemisah ribuan, koma sebagai desimal (maks. 2 digit), mis. 50.000,25 atau 6.000.000,00 */
+function parseNominal(str){
+  if (typeof str === 'number') return isFinite(str) ? str : 0;
+  let s = String(str === null || str === undefined ? '' : str).trim();
+  if (!s) return 0;
+  const neg = s.charAt(0) === '-';
+  s = s.replace(/[^\d,]/g, '');
+  const parts = s.split(',');
+  const intPart = parts[0] || '0';
+  const dec = (parts[1] || '').slice(0, 2);
+  const n = parseFloat(intPart + (dec ? '.' + dec : ''));
+  if (!isFinite(n)) return 0;
+  return Math.round((neg ? -n : n) * 100) / 100;
+}
+function formatNominalText(raw, padDecimals){
+  const str = String(raw === null || raw === undefined ? '' : raw);
+  const neg = str.trim().charAt(0) === '-';
+  const s = str.replace(/[^\d,]/g, '');
+  const idx = s.indexOf(',');
+  let intPart = idx === -1 ? s : s.slice(0, idx);
+  let decPart = idx === -1 ? null : s.slice(idx + 1).replace(/,/g, '').slice(0, 2);
+  if (padDecimals && intPart === '' && !decPart) return '';
+  intPart = intPart.replace(/^0+(?=\d)/, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  let out = intPart;
+  if (padDecimals){
+    out = (out === '' ? '0' : out) + ',' + (decPart || '').padEnd(2, '0');
+  } else if (decPart !== null){
+    out = (out === '' ? '0' : out) + ',' + decPart;
+  }
+  return neg ? '-' + out : out;
+}
+function attachNominalInput(inp, onChange){
+  inp.type = 'text';
+  inp.setAttribute('inputmode', 'decimal');
+  inp.setAttribute('autocomplete', 'off');
+  inp.addEventListener('keydown', e => {
+    // Titik pada keyboard dianggap koma desimal (titik ribuan dibuat otomatis)
+    if (e.key === '.' && !e.ctrlKey && !e.metaKey && !e.altKey){
+      e.preventDefault();
+      inp.setRangeText(',', inp.selectionStart, inp.selectionEnd, 'end');
+      inp.dispatchEvent(new Event('input', { bubbles:true }));
+    }
+  });
+  inp.addEventListener('paste', e => {
+    const t = (e.clipboardData && e.clipboardData.getData('text')) || '';
+    if (/^\s*-?\d+\.\d{1,2}\s*$/.test(t)){ // mis. 50000.25 -> 50000,25
+      e.preventDefault();
+      inp.setRangeText(t.trim().replace('.', ','), inp.selectionStart, inp.selectionEnd, 'end');
+      inp.dispatchEvent(new Event('input', { bubbles:true }));
+    }
+  });
+  inp.addEventListener('input', () => {
+    const before = inp.value;
+    const pos = inp.selectionStart === null ? before.length : inp.selectionStart;
+    const sig = before.slice(0, pos).replace(/[^\d,]/g, '').length;
+    const formatted = formatNominalText(before, false);
+    if (formatted !== before){
+      inp.value = formatted;
+      let cnt = 0, np = 0;
+      for (; np < formatted.length && cnt < sig; np++){ if (/[\d,]/.test(formatted.charAt(np))) cnt++; }
+      if (formatted.charAt(0) === '-' && np === 0 && pos > 0) np = 1;
+      try { inp.setSelectionRange(np, np); } catch(err){}
+    }
+    if (onChange) onChange(inp.value);
+  });
+  inp.addEventListener('blur', () => {
+    const f = formatNominalText(inp.value, true);
+    if (f !== inp.value) inp.value = f;
+    if (onChange) onChange(inp.value);
+  });
+}
+/* ===== NOMINAL-INPUT-END ===== */
+
 function pct(n){
   if (n === null || n === undefined || !isFinite(n)) return '—';
   return n.toFixed(1).replace('.', ',') + '%';
@@ -2164,10 +2238,10 @@ function renderInputMonths(){
     const field = el('div',{class:'month-field'},[
       textNode('label','',label),
     ]);
-    const input = el('input',{type:'number', step:'1000', placeholder:'0', id:'in-m-'+m});
+    const input = el('input',{type:'text', placeholder:'0,00', id:'in-m-'+m});
     input.value = state.input.monthly[m];
-    input.addEventListener('input', ()=>{
-      state.input.monthly[m] = input.value;
+    attachNominalInput(input, v => {
+      state.input.monthly[m] = v;
       updateInputTotal();
     });
     field.appendChild(input);
@@ -2175,7 +2249,7 @@ function renderInputMonths(){
   });
 }
 function updateInputTotal(){
-  const total = MONTHS.reduce((a,m)=>a + (parseFloat(state.input.monthly[m])||0), 0);
+  const total = MONTHS.reduce((a,m)=>a + parseNominal(state.input.monthly[m]), 0);
   document.getElementById('in-total').textContent = rp(total);
   return total;
 }
@@ -2202,7 +2276,7 @@ document.getElementById('in-submit').addEventListener('click', async ()=>{
   if (!d.belanja){ showToast('Pilih Belanja / Kode Rekening terlebih dahulu.'); return; }
   if (!d.uraian || !d.uraian.trim()){ showToast('Isi uraian rencana kebutuhan belanja.'); return; }
   const total = updateInputTotal();
-  if (!MONTHS.some(m => (parseFloat(d.monthly[m]) || 0) !== 0)){ showToast('Isi nominal rencana (boleh positif atau negatif) minimal untuk satu bulan.'); return; }
+  if (!MONTHS.some(m => parseNominal(d.monthly[m]) !== 0)){ showToast('Isi nominal rencana (boleh positif atau negatif) minimal untuk satu bulan.'); return; }
 
   const subUnitObj = RAK_LEAF_ITEMS.find(i=>i.sub_unit_code===d.subUnit);
   const subKegObj = RAK_LEAF_ITEMS.find(i=>i.sub_unit_code===d.subUnit && i.sub_kegiatan_code===d.subKegiatan);
@@ -2216,7 +2290,7 @@ document.getElementById('in-submit').addEventListener('click', async ()=>{
   }
 
   const monthlyClean = {};
-  MONTHS.forEach(m => monthlyClean[m] = parseFloat(d.monthly[m]) || 0);
+  MONTHS.forEach(m => monthlyClean[m] = parseNominal(d.monthly[m]));
 
   const selectedInputItem = RAK_LEAF_ITEMS.find(i=>i.sub_unit_code===d.subUnit && i.sub_kegiatan_code===d.subKegiatan && i.kode_rekening===d.belanja);
   if (!selectedInputItem || !isPptkAllowedItem(selectedInputItem)){ showToast('Kode rekening ini tidak termasuk penugasan akun PPTK.'); return; }
@@ -2362,6 +2436,11 @@ document.getElementById('rl-belanja') && document.getElementById('rl-belanja').a
   if (elm) elm.addEventListener('input', e=>{ state.realInput[stateKey] = e.target.value; });
 });
 
+(function(){
+  const jml = document.getElementById('rl-jumlah');
+  if (jml) attachNominalInput(jml, v => { state.realInput.jumlah = v; });
+})();
+
 document.getElementById('rl-clear') && document.getElementById('rl-clear').addEventListener('click', ()=>{
   state.realInput = { subUnit:'', subKegiatan:'', belanja:'', tanggal:'', noBukti:'', uraian:'', jumlah:'' };
   ['rl-tanggal','rl-nobukti','rl-uraian','rl-jumlah'].forEach(id=>{ const e=document.getElementById(id); if (e) e.value=''; });
@@ -2370,7 +2449,7 @@ document.getElementById('rl-clear') && document.getElementById('rl-clear').addEv
 
 document.getElementById('rl-submit') && document.getElementById('rl-submit').addEventListener('click', async ()=>{
   const d = state.realInput;
-  const jumlah = parseFloat(d.jumlah) || 0;
+  const jumlah = parseNominal(d.jumlah);
   if (!d.subUnit || !d.subKegiatan || !d.belanja){ showToast('Pilih Sub Unit, Sub Kegiatan, dan Kode Rekening terlebih dahulu.'); return; }
   if (state.auth.role === 'pptk' && !PPTK_ASSIGNMENTS_2026[String(state.auth.username || '').toLowerCase()]?.subKegiatanCodes.includes(d.subKegiatan)){ showToast('Sub kegiatan ini bukan bagian dari penugasan akun PPTK.'); return; }
   if (state.auth.role === 'pptk' && d.subUnit !== assignedMasterUnitCode()){ showToast('Akun PPTK ini hanya dapat menginput Sub Unit yang menjadi kewenangannya.'); return; }
